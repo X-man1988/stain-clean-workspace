@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<!-- 本工作台由 WorkBuddy 搭建；单文件全内联、零外部依赖。数据层内置在线数据表 SDK 自动接管能力，未注入时自动降级为 localStorage。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>污渍清洗方法工作台</title>
+<style>
+:root{
+  --brand:#0F766E; --brand-dark:#115E59; --brand-soft:#F0FDFA; --brand-line:#99F6E4;
+  --bg:#F6F8F9; --card:#FFFFFF; --ink:#1E293B; --ink-2:#334155; --muted:#64748B;
+  --line:#E2E8F0; --line-2:#CBD5E1;
+  --danger:#DC2626; --danger-soft:#FEF2F2; --danger-line:#FECACA;
+  --warn:#B45309; --warn-soft:#FFFBEB; --warn-line:#FDE68A;
+  --ok:#15803D; --ok-soft:#F0FDF4; --ok-line:#BBF7D0;
+  --blue:#1D4ED8; --blue-soft:#EFF6FF;
+  --radius:14px; --radius-s:9px;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.05);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:var(--font);font-size:16px;color:var(--ink)}
+button{cursor:pointer;border:none;background:none}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+ul,ol{padding-left:0;list-style:none}
+a{color:var(--brand);text-decoration:none}
+.hide{display:none !important}
+
+/* ---------- 顶部 ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1120px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+.brand-mark{width:36px;height:36px;border-radius:11px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex:none}
+.brand-txt{min-width:0}
+.brand-txt b{display:block;font-size:16px;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-txt small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3;white-space:nowrap}
+.sync{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--brand-soft);color:var(--brand-dark);border:1px solid var(--brand-line);white-space:nowrap}
+.sync.local{background:var(--blue-soft);color:var(--blue);border-color:#BFDBFE}
+.sync.off{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
+.sync i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block}
+.tool-group{display:flex;gap:7px;flex-wrap:wrap}
+.tbtn{min-height:38px;padding:6px 11px;border:1px solid var(--line);border-radius:var(--radius-s);background:#fff;color:var(--ink-2);font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.tbtn.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft)}
+
+/* ---------- 容器 / 卡片 ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:18px 18px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card-h{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.card-h h2{font-size:16.5px;font-weight:700;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.card-h .sub{color:var(--muted);font-size:12.5px;font-weight:400}
+.card-h .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.count-pill{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark);border:1px solid var(--brand-line)}
+.hint{background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);border-radius:var(--radius-s);padding:9px 12px;font-size:12.5px;display:flex;gap:8px;align-items:center}
+
+/* ---------- 今天要处理 ---------- */
+.today-card{border-left:4px solid var(--danger)}
+.today-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.today-item{border:1px solid var(--line);border-radius:var(--radius-s);padding:11px 12px;background:#fff;display:flex;gap:10px;align-items:flex-start}
+.today-item.overdue{background:var(--danger-soft);border-color:var(--danger-line)}
+.today-item .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);margin-top:7px;flex:none}
+.today-item.overdue .dot{background:var(--danger)}
+.today-item .body{flex:1;min-width:0}
+.today-item .t1{font-weight:700;font-size:14px;line-height:1.4}
+.today-item .t2{color:var(--muted);font-size:12px;margin-top:2px;line-height:1.5}
+.today-item.overdue .t2{color:var(--danger)}
+.today-item .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.mini{min-height:32px;padding:4px 10px;border:1px solid var(--line-2);border-radius:7px;background:#fff;font-size:12px;font-weight:600;color:var(--ink-2)}
+.mini:hover{border-color:var(--brand);color:var(--brand)}
+.mini.solid{background:var(--brand);border-color:var(--brand);color:#fff}
+.mini.solid:hover{background:var(--brand-dark);color:#fff}
+.empty{border:1px dashed var(--line-2);border-radius:var(--radius-s);padding:22px 14px;text-align:center;color:var(--muted);font-size:13px;background:#FCFDFD}
+.empty b{display:block;color:var(--ink-2);font-size:14px;margin-bottom:4px}
+
+/* ---------- Tab ---------- */
+.tabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:16px;box-shadow:var(--shadow)}
+.tab{flex:1;min-height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:600;color:var(--muted)}
+.tab:hover{background:var(--bg);color:var(--ink-2)}
+.tab.on{background:var(--brand);color:#fff}
+.tab.on svg{stroke:#fff}
+
+/* ---------- 表单 ---------- */
+.form-row{display:grid;gap:11px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.3px}
+.field input,.field select,.field textarea{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line-2);border-radius:var(--radius-s);background:#fff;font-size:16px;outline:none}
+.field textarea{min-height:70px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.search-line{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.search-line .kw{flex:1;min-width:200px;position:relative}
+.search-line .kw input{width:100%;min-height:46px;padding:9px 12px 9px 38px;border:1px solid var(--line-2);border-radius:var(--radius-s);font-size:16px;outline:none;background:#fff}
+.search-line .kw input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.search-line .kw svg{position:absolute;left:12px;top:14px}
+.btn{min-height:44px;padding:9px 17px;border-radius:var(--radius-s);background:var(--brand);color:#fff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn:hover{background:var(--brand-dark)}
+.btn.ghost{background:#fff;color:var(--ink-2);border:1px solid var(--line-2)}
+.btn.ghost:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.btn.danger{background:var(--danger)}
+.btn.danger:hover{background:#B91C1C}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:12.5px}
+
+/* ---------- 三步筛选 ---------- */
+.step-block{margin-bottom:13px}
+.step-label{font-size:12.5px;font-weight:700;color:var(--ink-2);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.step-num{width:19px;height:19px;border-radius:50%;background:var(--brand-soft);color:var(--brand-dark);font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{min-height:40px;padding:7px 13px;border:1px solid var(--line-2);border-radius:999px;background:#fff;font-size:13.5px;font-weight:600;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip small{font-weight:400;font-size:11px;opacity:.8}
+
+/* ---------- 结果卡片 ---------- */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;margin-top:14px}
+.rcard{border:1px solid var(--line);border-radius:var(--radius-s);padding:13px;background:#fff;display:flex;flex-direction:column;gap:9px;transition:border-color .15s,transform .15s}
+.rcard:hover{border-color:var(--brand);transform:translateY(-1px)}
+.rcard .top{display:flex;align-items:flex-start;gap:8px}
+.rcard .top b{font-size:14.5px;line-height:1.4;flex:1}
+.rcard .desc{font-size:12.5px;color:var(--muted);line-height:1.55}
+.rcard .foot{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:4px}
+.badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;letter-spacing:.2px}
+.b-l1{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.b-l2{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+.b-l3{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger-line)}
+.b-gray{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.b-blue{background:var(--blue-soft);color:var(--blue);border:1px solid #BFDBFE}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+
+/* ---------- 方案详情 ---------- */
+.detail-head{border:1px solid var(--line);border-radius:var(--radius-s);padding:15px;background:linear-gradient(135deg,#F0FDFA,#FFFFFF)}
+.detail-head .dh-top{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.detail-head h3{font-size:19px;font-weight:800;line-height:1.4;flex:1;min-width:200px}
+.detail-head .lead{color:var(--ink-2);font-size:13.5px;margin-top:8px;line-height:1.7}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin:14px 0}
+.meta{background:#fff;border:1px solid var(--line);border-radius:var(--radius-s);padding:9px 11px}
+.meta .k{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.3px}
+.meta .v{font-size:13.5px;font-weight:700;margin-top:2px;line-height:1.45}
+.sec-title{font-size:13.5px;font-weight:800;color:var(--ink-2);margin:18px 0 9px;display:flex;align-items:center;gap:8px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.steps{counter-reset:st}
+.step-item{display:flex;gap:11px;align-items:flex-start;padding:10px 11px;border:1px solid var(--line);border-radius:var(--radius-s);margin-bottom:8px;background:#fff;cursor:pointer}
+.step-item.done{background:var(--brand-soft);border-color:var(--brand-line)}
+.step-item.done .stxt{text-decoration:line-through;color:var(--muted)}
+.step-box{width:22px;height:22px;border:2px solid var(--line-2);border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.step-item.done .step-box{background:var(--brand);border-color:var(--brand)}
+.step-num-t{font-size:11px;font-weight:800;color:var(--brand-dark);flex:none;margin-top:2px}
+.stxt{font-size:13.5px;line-height:1.65;flex:1}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dobox{border-radius:var(--radius-s);padding:12px;border:1px solid}
+.dobox.do{background:var(--ok-soft);border-color:var(--ok-line)}
+.dobox.dont{background:var(--danger-soft);border-color:var(--danger-line)}
+.dobox h4{font-size:13px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.dobox.do h4{color:var(--ok)} .dobox.dont h4{color:var(--danger)}
+.dobox li{font-size:12.8px;line-height:1.6;padding-left:16px;position:relative;margin-bottom:6px;color:var(--ink-2)}
+.dobox li:before{content:"";position:absolute;left:2px;top:9px;width:5px;height:5px;border-radius:50%;background:currentColor}
+.dobox.do li:before{color:var(--ok)} .dobox.dont li:before{color:var(--danger)}
+.rule-box{background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:var(--radius-s);padding:12px;margin-top:12px}
+.rule-box h4{font-size:13px;font-weight:800;color:var(--danger);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.rule-box li{font-size:12.8px;color:#7F1D1D;line-height:1.65;padding-left:15px;position:relative;margin-bottom:5px}
+.rule-box li:before{content:"!";position:absolute;left:0;top:0;font-weight:800;color:var(--danger)}
+.alt-box{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-s);padding:12px;margin-top:12px}
+.alt-box h4{font-size:12.5px;font-weight:800;color:var(--ink-2);margin-bottom:6px}
+.alt-box p{font-size:13px;line-height:1.7;color:var(--ink-2)}
+.src-line{font-size:11.8px;color:var(--muted);margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ---------- 记录 ---------- */
+.rec-filter{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:13px}
+.rec-filter select,.rec-filter input{min-height:40px;padding:7px 10px;border:1px solid var(--line-2);border-radius:var(--radius-s);background:#fff;font-size:16px;outline:none}
+.rec-list{display:grid;gap:10px}
+.rec{border:1px solid var(--line);border-radius:var(--radius-s);padding:12px;background:#fff;display:flex;gap:12px;align-items:flex-start}
+.rec.done{background:#FBFCFC}
+.rec .main{flex:1;min-width:0}
+.rec .r1{font-size:14px;font-weight:700;line-height:1.45;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rec .r2{font-size:12.3px;color:var(--muted);margin-top:4px;line-height:1.6}
+.rec .r3{font-size:12.5px;color:var(--ink-2);margin-top:6px;background:var(--bg);border-radius:6px;padding:6px 9px;line-height:1.6}
+.rec .side{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex:none}
+.rec .side select{min-height:34px;padding:4px 8px;border:1px solid var(--line-2);border-radius:7px;background:#fff;font-size:13px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin-bottom:14px}
+.stat{border:1px solid var(--line);border-radius:var(--radius-s);padding:11px;background:#fff;text-align:center}
+.stat .n{font-size:22px;font-weight:800;color:var(--brand);line-height:1.2}
+.stat .l{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+/* ---------- 弹窗 / 提示 ---------- */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:16px;width:min(520px,100%);max-height:88vh;overflow:auto;padding:20px;box-shadow:0 20px 60px rgba(15,23,42,.22)}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:9px}
+.modal p{font-size:13.5px;color:var(--ink-2);line-height:1.7;margin-bottom:14px}
+.modal .acts{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:600;z-index:80;box-shadow:0 8px 24px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.legend{font-size:11.8px;color:var(--muted);line-height:1.8;margin-top:10px}
+.legend b{color:var(--ink-2)}
+.footnote{font-size:11.5px;color:var(--muted);text-align:center;padding:8px 10px 20px;line-height:1.8}
+
+/* ---------- 拍照识污渍 ---------- */
+.notice{background:var(--blue-soft);border:1px solid #BFDBFE;color:#1E40AF;border-radius:var(--radius-s);padding:10px 12px;font-size:12.5px;line-height:1.7;margin-bottom:14px}
+.notice b{color:#1E3A8A}
+.photo-drop{border:2px dashed var(--line-2);border-radius:var(--radius);padding:26px 16px;text-align:center;background:#FCFDFD;display:flex;flex-direction:column;align-items:center;gap:8px}
+.photo-drop b{font-size:15px;color:var(--ink-2)}
+.photo-drop span{font-size:12.5px;color:var(--muted);max-width:400px;line-height:1.6}
+.photo-drop .btn{margin-top:6px}
+.photo-preview{border:1px solid var(--line);border-radius:var(--radius);padding:12px;background:#fff}
+.photo-preview img{display:block;max-width:100%;max-height:250px;margin:0 auto;border-radius:var(--radius-s);border:1px solid var(--line)}
+.photo-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:11px}
+.swatch{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.swatch i{width:19px;height:19px;border-radius:5px;border:1px solid var(--line-2);display:block;flex:none}
+.cand-list{display:grid;gap:9px;margin-top:12px}
+.cand{border:1px solid var(--line);border-radius:var(--radius-s);padding:11px 12px;background:#fff;display:flex;gap:11px;align-items:flex-start}
+.cand .rank{width:26px;height:26px;border-radius:8px;background:var(--brand-soft);color:var(--brand-dark);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.cand .cb{flex:1;min-width:0}
+.cand .c1{font-size:14px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cand .c2{font-size:12.3px;color:var(--muted);line-height:1.6;margin-top:4px}
+.cand .c3{font-size:12.3px;color:var(--warn);line-height:1.6;margin-top:5px}
+.cand .ca{display:flex;flex-direction:column;gap:6px;flex:none}
+.conf{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.conf.hi{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.conf.mid{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+.conf.low{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.vision{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.vision summary{font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:600}
+.vision .vbody{margin-top:11px}
+.vision .warn{font-size:12px;color:#7F1D1D;background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:8px;padding:8px 10px;line-height:1.65;margin-bottom:10px}
+
+/* ---------- 移动端 ---------- */
+@media(max-width:768px){
+  .topbar-in{padding:9px 12px;gap:9px}
+  .brand-txt b{font-size:14.5px}
+  .tool-group{width:100%;order:3}
+  .tbtn{flex:1;justify-content:center;min-height:38px}
+  .wrap{padding:12px 12px 96px}
+  .card{padding:14px;margin-bottom:12px}
+  .today-list,.result-grid{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;border-radius:0;border-left:0;border-right:0;border-bottom:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -3px 14px rgba(15,23,42,.08)}
+  .tab{font-size:12.5px;flex-direction:column;gap:2px;min-height:50px}
+  .tab svg{width:19px;height:19px}
+  .form-row{grid-template-columns:1fr}
+  .rec{flex-direction:column}
+  .rec .side{flex-direction:row;align-items:center;width:100%}
+  .card-h .right{width:100%;margin-left:0}
+  .footnote{padding-bottom:12px}
+  .photo-drop{padding:18px 12px}
+  .photo-preview img{max-height:200px}
+  .cand{flex-direction:column}
+  .cand .ca{flex-direction:row;width:100%;flex-wrap:wrap}
+  .cand .ca .btn,.cand .ca .mini{flex:1;justify-content:center}
+}
+@media(min-width:769px){ .mobile-only{display:none} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c0 0-5.6 6.4-5.6 10.4a5.6 5.6 0 0 0 11.2 0C17.6 9.1 12 2.7 12 2.7Z"/><path d="M9.3 13.6a2.8 2.8 0 0 0 2.8 2.8"/></svg>
+      </div>
+      <div class="brand-txt">
+        <b>污渍清洗方法工作台</b>
+        <small>污渍 × 材质 → 方案 ｜ 离线可用</small>
+      </div>
+    </div>
+    <span id="syncBadge" class="sync local"><i></i>本地存储</span>
+    <div class="tool-group">
+      <button class="tbtn" id="btnExport" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出 JSON 备份</button>
+      <button class="tbtn" id="btnImport" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>导入恢复</button>
+      <button class="tbtn" id="btnClearDemo" type="button">清空示例数据</button>
+      <button class="tbtn danger" id="btnClearAll" type="button">清空全部</button>
+      <input type="file" id="fileImport" accept=".json,application/json" class="hide">
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 今天要处理（置顶） -->
+  <section class="card today-card" id="todayCard">
+    <div class="card-h">
+      <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>今天要处理</h2>
+      <span class="sub">逾期 / 今天到期 / 未完成的自动顺延到此</span>
+      <div class="right"><span class="count-pill" id="todayCount">0 项</span></div>
+    </div>
+    <div class="hint hide" id="backupHint"></div>
+    <div class="today-list" id="todayList"></div>
+  </section>
+
+  <!-- Tab -->
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="search" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><line x1="16" y1="16" x2="21" y2="21"/></svg>去渍速查</button>
+    <button class="tab" data-tab="photo" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>拍照识别</button>
+    <button class="tab" data-tab="detail" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>方案详情</button>
+    <button class="tab" data-tab="records" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>我的处理记录</button>
+  </nav>
+
+  <!-- 模块1 去渍速查 -->
+  <section class="card" id="panel-search">
+    <div class="card-h"><h2>去渍速查</h2><span class="sub">三步定位：什么东西 → 什么材质 → 什么污渍</span></div>
+    <div class="search-line" style="margin-bottom:14px">
+      <div class="kw">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+        <input type="search" id="kwInput" placeholder="直接搜污渍：血渍 / 咖啡 / 口红 / 口香糖 / 霉斑…" autocomplete="off">
+      </div>
+      <button class="btn ghost" id="btnReset" type="button">重置筛选</button>
+    </div>
+    <div class="step-block">
+      <div class="step-label"><span class="step-num">1</span>什么东西脏了</div>
+      <div class="chips" id="itemChips"></div>
+    </div>
+    <div class="step-block">
+      <div class="step-label"><span class="step-num">2</span>什么材质 <span class="sub" style="font-weight:400;color:var(--muted)">（决定忌用成分与水温上限）</span></div>
+      <div class="chips" id="materialChips"></div>
+    </div>
+    <div class="step-block">
+      <div class="step-label"><span class="step-num">3</span>什么污渍 <span class="sub" style="font-weight:400;color:var(--muted)">（按化学性质分族，同族通用一套处理逻辑）</span></div>
+      <div class="chips" id="stainChips"></div>
+    </div>
+    <div class="card-h" style="margin:16px 0 0"><h2 style="font-size:14px">匹配结果</h2><span class="sub" id="resultSummary"></span></div>
+    <div class="result-grid" id="resultList"></div>
+    <div class="legend">
+      <b>三级匹配：</b>
+      <span class="badge b-l1">L1 专属方案</span> 该污渍族 × 该材质有专门方案；
+      <span class="badge b-l2">L2 通用方案</span> 沿用同族通用方案并强制局部测试、过滤忌用成分；
+      <span class="badge b-l3">L3 安全拦截</span> 高风险材质只给应急止损并建议送专业清洗。
+    </div>
+  </section>
+
+  <!-- 模块4 拍照识污渍 -->
+  <section class="card hide" id="panel-photo">
+    <div class="card-h"><h2>拍照识污渍</h2><span class="sub">取色 + 特征问答 → 候选污渍 → 复用三级匹配给方案</span></div>
+    <div class="notice"><b>这是辅助判断，不是 AI 确诊。</b>照片只在你本机浏览器里用 Canvas 取色，不上传任何服务器。颜色受光线与白平衡影响很大，只作弱参考；请以下方观察项为主，结果必须人工确认后再查方案。所有方案仍强制走安全闸门与「不显眼处先测试」。也可以完全跳过拍照，直接填观察项。</div>
+
+    <div id="photoDrop" class="photo-drop">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0F766E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <b>拍一张 / 选一张污渍照片</b>
+      <span>尽量在自然光下拍摄，让污渍占画面主体、避开大面积背景；手机上点下方按钮可选择直接拍照。</span>
+      <button class="btn" id="btnTakePhoto" type="button">拍照 / 选择图片</button>
+      <input type="file" id="filePhoto" accept="image/*" class="hide">
+    </div>
+
+    <div id="photoPreview" class="photo-preview hide">
+      <img id="photoImg" alt="污渍照片预览">
+      <canvas id="photoCanvas" width="64" height="64" class="hide"></canvas>
+      <div class="photo-bar">
+        <span class="swatch" id="photoSwatch"><i style="background:#E2E8F0"></i>污渍主色：待分析</span>
+        <span class="swatch" id="photoSwatchBg"><i style="background:#E2E8F0"></i>背景色：待分析</span>
+        <button class="btn ghost sm" id="btnRetake" type="button">换一张照片</button>
+      </div>
+    </div>
+
+    <div class="sec-title" style="margin-top:18px">补 5 个观察项（颜色是主信号，材质决定安全禁忌）</div>
+    <div class="form-row">
+      <div class="field"><label>① 看到的颜色</label><select id="pqColor" data-act="photo-answer" data-k="color">
+        <option value="">不确定 / 跳过</option>
+        <option value="red">红 / 红褐 / 粉红</option>
+        <option value="yellowbrown">黄 / 棕 / 橙褐</option>
+        <option value="dark">深棕 / 黑 / 灰黑</option>
+        <option value="blue">蓝 / 紫</option>
+        <option value="green">绿</option>
+        <option value="light">浅色 / 白 / 近无色</option>
+      </select></div>
+      <div class="field"><label>② 新鲜程度</label><select id="pqState" data-act="photo-answer" data-k="state">
+        <option value="">不确定</option><option value="fresh">刚弄上、还湿</option><option value="dry">已干、结块或发硬</option>
+      </select></div>
+      <div class="field"><label>③ 看 / 摸的感觉</label><select id="pqFeel" data-act="photo-answer" data-k="feel">
+        <option value="">不确定</option><option value="oily">油亮 / 有油晕</option><option value="sticky">发黏 / 拉丝</option>
+        <option value="powder">粉状 / 颗粒 / 可扫掉</option><option value="hard">硬块 / 可刮起</option><option value="plain">无明显手感，像渗进去的颜色</option>
+      </select></div>
+      <div class="field"><label>④ 脏了的东西</label><select id="pqItem" data-act="photo-answer" data-k="item">
+        <option value="kid">小孩衣物</option><option value="adult">大人衣物</option><option value="shoes">鞋子</option>
+        <option value="sofa">沙发 / 家具</option><option value="wall">墙壁</option>
+      </select></div>
+      <div class="field"><label>⑤ 材质（选错会影响禁忌提示）</label><select id="pqMaterial" data-act="photo-answer" data-k="material">
+        <option value="cotton">棉 / 麻 / 棉麻</option><option value="synthetic">化纤 / 混纺</option>
+        <option value="silkwool">真丝 / 羊毛 / 羊绒</option><option value="leather">皮革 / 绒面 / 磨砂</option>
+        <option value="upholstery">布艺 / 科技布沙发</option><option value="latex">乳胶漆墙面</option>
+        <option value="wallpaper">壁纸 / 墙布</option><option value="tile">瓷砖 / 玻璃 / 硬面</option><option value="wood">实木 / 木饰面 / 竹木</option>
+      </select></div>
+    </div>
+    <div style="margin-top:13px;display:flex;gap:9px;flex-wrap:wrap">
+      <button class="btn" id="btnInfer" type="button">生成候选污渍</button>
+      <button class="btn ghost" id="btnPhotoReset" type="button">清空重来</button>
+    </div>
+
+    <div id="photoResult"></div>
+
+    <details class="vision">
+      <summary>可选：接入你自己的云端视觉模型（默认关闭）</summary>
+      <div class="vbody">
+        <div class="warn">启用后照片会以 base64 发送到你填写的端点，属于对外传输；密钥会暴露在前端，仅建议在自有或内网服务使用。本页默认不发起任何网络请求，端点与密钥只存在本次会话内存中，刷新即失效、不写入备份文件。若不需要，请忽略本区。</div>
+        <div class="form-row">
+          <div class="field"><label>视觉接口 URL</label><input id="vEndpoint" type="url" placeholder="https://your-service/v1/stain" autocomplete="off"></div>
+          <div class="field"><label>API Key（仅本次会话）</label><input id="vKey" type="password" placeholder="留空则不启用" autocomplete="off"></div>
+        </div>
+        <div style="margin-top:10px"><button class="btn ghost sm" id="btnVision" type="button">用云端模型再判一次</button></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- 模块2 方案详情 -->
+  <section class="card hide" id="panel-detail">
+    <div id="detailBody"></div>
+  </section>
+
+  <!-- 模块3 我的处理记录 -->
+  <section class="card hide" id="panel-records">
+    <div class="card-h">
+      <h2>我的处理记录</h2><span class="sub">把每次处理记下来，"我家实测"会沉淀成私有经验</span>
+      <div class="right"><button class="btn sm" id="btnNewCase" type="button">+ 新建处理单</button></div>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="rec-filter">
+      <select id="filterStatus"><option value="all">全部状态</option><option value="todo">待处理</option><option value="doing">处理中</option><option value="done">已完成</option></select>
+      <select id="filterFamily"><option value="all">全部污渍族</option></select>
+      <input type="search" id="filterKw" placeholder="按对象 / 污渍 / 备注搜索" style="flex:1;min-width:160px">
+    </div>
+    <div class="rec-list" id="recList"></div>
+  </section>
+
+  <div class="footnote">知识库为通用家庭护理常识整理，仅供速查参考；贵重、真丝羊毛、真皮、壁纸等物品建议先送专业清洗。<br>所有方案均要求先在不显眼处测试，含氯漂白剂严禁与酸性清洁剂 / 氨类混用。处理记录仅保存在你的浏览器；拍照默认在本机取色、不上传，只有你主动填写云端视觉接口并点击按钮时，照片才会发送到该接口。</div>
+</div>
+
+<div id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   分层架构：KB(静态知识库) → 数据层 → 计算层 → 渲染层 → 统一刷新入口
+   单向调用：渲染函数之间严禁互调，全部由 refreshAll() 调度。
+   ============================================================ */
+"use strict";
+
+/* ---------- KB：静态知识库（离线内置，不联网、不臆造） ---------- */
+var KB = {};
+
+/* 载体：5 类，各自允许出现的材质族 */
+KB.items = [
+  { id:"kid",   name:"小孩衣物", desc:"校服、T恤、口水巾、羽绒服", materials:["cotton","synthetic","silkwool"] },
+  { id:"adult", name:"大人衣物", desc:"衬衫、羊毛衫、西装、内衣", materials:["cotton","synthetic","silkwool"] },
+  { id:"shoes", name:"鞋子",     desc:"运动鞋、帆布鞋、皮鞋、绒面靴", materials:["synthetic","cotton","leather"] },
+  { id:"sofa",  name:"沙发/家具", desc:"布艺沙发、科技布、皮质坐垫、实木茶几", materials:["upholstery","leather","wood"] },
+  { id:"wall",  name:"墙壁",     desc:"乳胶漆墙面、壁纸、瓷砖墙", materials:["latex","wallpaper","tile"] }
+];
+
+/* 材质族：决定水温上限、忌用成分、是否高风险 */
+KB.materials = [
+  { id:"cotton",      name:"棉 / 麻 / 棉麻",   washable:true,  risk:"low",  tempMax:"60℃", avoid:["含氯漂白剂用于彩色衣物","强酸"], note:"耐碱不耐酸，白色棉织物可谨慎用氧系漂白剂" },
+  { id:"synthetic",   name:"化纤 / 混纺",       washable:true,  risk:"low",  tempMax:"40℃", avoid:["高温烘干","丙酮等强溶剂","含氯漂白剂"], note:"涤纶锦纶遇高温易变形，油渍反而不易渗入" },
+  { id:"silkwool",    name:"真丝 / 羊毛 / 羊绒", washable:true,  risk:"high", tempMax:"30℃冷水", avoid:["热水","碱性洗衣粉","含酶洗衣粉","含氯漂白剂","拧绞","烘干","刷子"], note:"蛋白质纤维，遇热遇碱即缩水毡化，属高风险材质" },
+  { id:"leather",     name:"皮革 / 绒面 / 磨砂", washable:false, risk:"high", tempMax:"不可浸水", avoid:["浸水","酒精","含氯漂白剂","热水","暴晒","硬毛刷"], note:"鞋面与皮沙发共用此族，只做局部点处理" },
+  { id:"upholstery",  name:"布艺 / 科技布沙发", washable:false, risk:"high", tempMax:"微湿", avoid:["大量灌水","浸泡","含氯漂白剂原液","蒸汽机高温"], note:"不可拆洗，只能局部少量处理，务必先在不显眼处试" },
+  { id:"latex",       name:"乳胶漆墙面",       washable:false, risk:"mid",  tempMax:"微湿", avoid:["强溶剂","钢丝球","大面积湿擦","含氯漂白剂原液"], note:"反复擦会掉粉露底，宜按压吸附不要来回搓" },
+  { id:"wallpaper",   name:"壁纸 / 墙布",       washable:false, risk:"high", tempMax:"干燥", avoid:["水","湿擦","任何溶剂","蒸汽"], note:"绝大多数壁纸遇水即起翘褪色，属高风险材质" },
+  { id:"tile",        name:"瓷砖 / 玻璃 / 硬面", washable:true,  risk:"low",  tempMax:"不限", avoid:["强酸与含氯漂白剂混用","氢氟酸类"], note:"耐酸碱性好，硬质表面可用力擦" },
+  { id:"wood",        name:"实木 / 木饰面 / 竹木", washable:false, risk:"mid",  tempMax:"微湿", avoid:["大量用水浸泡","强碱","含氯漂白剂原液","钢丝球"], note:"木质家具与地板暂无专属方案，统一走同族通用方案并强制先局部测试" }
+];
+
+/* 污渍族：按化学性质分族，同族共用一套首处理逻辑 */
+KB.families = [
+  { id:"protein",  name:"蛋白质类", chem:"蛋白质遇热凝固，越烫越洗不掉", firstAid:"先用冷水冲 / 吸，绝不能用热水", color:"#DC2626",
+    stains:[
+      {id:"blood",  name:"血渍",       aliases:["经血","鼻血"]},
+      {id:"milk",   name:"奶渍 / 母乳", aliases:["牛奶","奶粉"]},
+      {id:"egg",    name:"蛋液",       aliases:["鸡蛋"]},
+      {id:"sweat",  name:"汗渍 / 黄渍", aliases:["领口黄","腋下黄"]},
+      {id:"vomit",  name:"呕吐物",     aliases:["吐奶"]},
+      {id:"gravy",  name:"肉汁 / 菜汤", aliases:["汤汁"]}
+    ]},
+  { id:"tannin",   name:"鞣酸 / 色素类", chem:"单宁与植物色素，遇热、遇碱易固色", firstAid:"冷水吸干，别用热水、别先打肥皂", color:"#B45309",
+    stains:[
+      {id:"coffee", name:"咖啡",       aliases:["拿铁"]},
+      {id:"tea",    name:"茶渍",       aliases:["红茶","绿茶"]},
+      {id:"juice",  name:"果汁",       aliases:["橙汁","葡萄汁","西瓜汁"]},
+      {id:"wine",   name:"红酒",       aliases:["葡萄酒"]},
+      {id:"cola",   name:"可乐 / 汽水", aliases:["碳酸饮料"]},
+      {id:"soy",    name:"酱油 / 醋",   aliases:["老抽"]},
+      {id:"ketchup",name:"番茄酱",     aliases:["番茄汁"]}
+    ]},
+  { id:"oil",      name:"油脂类", chem:"疏水，必须先乳化或吸附，直接冲水会摊开", firstAid:"干纸巾 / 爽身粉先吸油，别沾水", color:"#1D4ED8",
+    stains:[
+      {id:"cookoil",name:"食用油 / 辣椒油", aliases:["油渍","红油"]},
+      {id:"butter", name:"奶油 / 黄油",   aliases:["蛋糕","冰淇淋"]},
+      {id:"lipstick",name:"口红 / 唇膏",  aliases:["唇印"]},
+      {id:"makeup", name:"粉底 / 化妆品", aliases:["BB霜","遮瑕"]},
+      {id:"machine",name:"机油 / 润滑油", aliases:["链条油"]},
+      {id:"cream",  name:"护手霜 / 乳液", aliases:["面霜"]}
+    ]},
+  { id:"pigment",  name:"颜料 / 颗粒类", chem:"颜料或固体颗粒，需溶剂溶解或吸附带走", firstAid:"别揉搓，先吸后溶，防止压进纤维", color:"#7C3AED",
+    stains:[
+      {id:"ink",    name:"墨水 / 钢笔水", aliases:["墨汁"]},
+      {id:"pen",    name:"圆珠笔 / 中性笔", aliases:["笔迹"]},
+      {id:"marker", name:"马克笔 / 水彩笔", aliases:["记号笔","白板笔"]},
+      {id:"crayon", name:"蜡笔 / 彩铅",   aliases:["油画棒"]},
+      {id:"mud",    name:"泥渍 / 黄泥",   aliases:["泥点","尘土"]},
+      {id:"nail",   name:"指甲油",       aliases:["甲油"]}
+    ]},
+  { id:"adhesive", name:"胶类", chem:"树脂 / 橡胶基，靠降温变脆或油溶解除", firstAid:"冷冻变硬后剥离，或用油类软化，别硬撕", color:"#0F766E",
+    stains:[
+      {id:"gum",    name:"口香糖",       aliases:["泡泡糖"]},
+      {id:"sticker",name:"不干胶 / 贴纸残胶", aliases:["标签胶","胶痕"]},
+      {id:"tape",   name:"双面胶 / 胶带痕", aliases:["透明胶"]},
+      {id:"glue502",name:"502 / 瞬间胶",  aliases:["万能胶"]}
+    ]},
+  { id:"other",    name:"其他专项", chem:"霉变 / 金属离子 / 氧化还原，需专用处理", firstAid:"先辨识污渍类型，严禁盲目混用清洁剂", color:"#475569",
+    stains:[
+      {id:"mold",   name:"霉斑 / 霉点",   aliases:["发霉","黑斑"]},
+      {id:"rust",   name:"锈渍",         aliases:["铁锈"]},
+      {id:"urine",  name:"尿渍 / 宠物尿", aliases:["尿味","猫尿"]},
+      {id:"wax",    name:"蜡烛油 / 蜡",   aliases:["烛泪"]},
+      {id:"iodine", name:"碘酒 / 药水",   aliases:["紫药水"]},
+      {id:"paint",  name:"油漆 / 乳胶漆", aliases:["涂料"]}
+    ]}
+];
+
+/* 硬禁忌规则：所有方案强制叠加，不因匹配级别而省略 */
+KB.rules = [
+  { id:"R1", text:"含氯漂白剂（84 / 漂白水）严禁与酸性清洁剂（洁厕灵、醋、柠檬酸）或氨类清洁剂混用，会产生有毒氯气。", scope:"all" },
+  { id:"R2", text:"任何方案执行前，先在不显眼处（衣缝内侧 / 沙发背面 / 墙角）测试，观察 5 分钟无褪色、无变硬再继续。", scope:"all" },
+  { id:"R3", text:"真丝、羊毛、羊绒忌热水、强碱、含酶洗衣粉与拧绞；只能冷水轻压，平铺阴干。", scope:["silkwool"] },
+  { id:"R4", text:"皮革、绒面忌浸水、酒精与暴晒；只做局部点处理，处理后用干布吸干并自然阴干。", scope:["leather"] },
+  { id:"R5", text:"小孩衣物慎用刺激性溶剂与含氯漂白剂；必须多次清水漂洗至无残留，避免接触皮肤。", scope:["kid"] },
+  { id:"R6", text:"壁纸、墙布忌水忌擦；任何湿处理都可能造成起翘、褪色，建议直接咨询厂家或专业人员。", scope:["wallpaper"] },
+  { id:"R7", text:"布艺 / 科技布沙发忌大量灌水与浸泡，水分渗入海绵会发霉、留水圈；只可少量局部按压。", scope:["upholstery"] },
+  { id:"R8", text:"氧化剂（双氧水、彩漂、漂白水）与还原剂、酸性剂不可同时叠加使用，两次处理之间须彻底漂净。", scope:"all" },
+  { id:"R9", text:"乳胶漆墙面忌强溶剂与钢丝球，擦拭方向由外向内按压吸附，避免扩大污染面与掉粉。", scope:["latex"] },
+  { id:"R10",text:"不确定材质成分、或为贵重 / 有涂层 / 不可水洗标识的物品，一律止步于应急止损，送专业清洗。", scope:"all" }
+];
+
+/* 来源等级：区分通用常识与家庭实测，避免把个人经验当通用结论 */
+KB.sources = {
+  common: { label:"通用常识", note:"家庭护理通行做法整理，执行前请核对衣物洗标与厂家说明" },
+  label:  { label:"护理标签", note:"以衣物洗标 / 家具厂家清洁说明为准，标签优先于本页建议" },
+  mine:   { label:"我家实测", note:"来自你的处理记录，仅代表个人经验，不作为通用结论" }
+};
+
+/* ---------- 族级通用方案（L2 兜底，6 条完整方案） ---------- */
+KB.base = {
+  protein: {
+    mats:["冷水","中性洗衣液 / 婴儿洗衣液","干净白布或纸巾","3% 双氧水（仅白色棉麻可选）"],
+    temp:"全程冷水 ≤30℃，严禁热水",
+    steps:[
+      "立刻用干纸巾或白布从污渍外缘向中心按压吸走表层，不要来回揉搓。",
+      "污渍背面垫干布，用冷水从背面冲洗 2～3 分钟，让污渍被顶出纤维而不是压进去。",
+      "中性洗衣液原液点涂在污渍处，静置 10 分钟，用指腹轻拍（不搓、不刷）。",
+      "冷水漂净后按洗标正常洗涤；洗前确认污渍已消失，一旦烘干 / 熨烫就很难再去除。"
+    ],
+    dos:["越早处理越好，陈旧血渍可先用冷水浸泡 30 分钟","白色棉麻可点涂 3% 双氧水，彩色衣物一律不用","小孩衣物最后多漂洗一遍，确保无洗涤剂残留"],
+    donts:["绝不能用热水、温水 —— 蛋白质遇热凝固会永久固色","不要用肥皂直接搓，碱性会让蛋白污渍更难溶","污渍没去掉之前不要烘干、不要熨烫"],
+    alt:"若仍有淡痕：白色棉麻可日晒晾干辅助分解；彩色 / 精细面料直接送洗。",
+    time:"约 15～25 分钟", diff:"简单", src:"common"
+  },
+  tannin: {
+    mats:["冷水","干净白布 / 纸巾","中性洗衣液","甘油或白醋（彩色衣物慎用）","小苏打"],
+    temp:"先冷水，确认不掉色后可升至材质允许温度",
+    steps:[
+      "用干布按压吸走液体，切勿擦拭扩散；固体残留（番茄酱等）用勺背轻轻刮起。",
+      "从污渍背面用冷水冲淋，持续 1～2 分钟，把色素稀释带出。",
+      "中性洗衣液点涂轻拍、静置 5～10 分钟后冷水漂净；可重复一次。",
+      "仍有色素时，彩色衣物用甘油敷 10 分钟再洗；白色棉麻可用氧系彩漂，勿用含氯漂白剂直接倒。"
+    ],
+    dos:["冷水优先，热水会让单宁类色素固着","先在隐蔽处试甘油 / 醋，确认不褪色","红酒类可先用少量食盐吸附再冲水"],
+    donts:["不要先用肥皂或碱性洗衣粉，易与单宁结合固色","不要用热水冲第一遍","不要把含氯漂白剂原液直接倒在彩色织物上"],
+    alt:"陈旧鞣酸渍可用氧系漂白剂按说明浸泡（仅限标注可漂白的白色 / 彩色衣物），真丝羊毛不适用。",
+    time:"约 15～20 分钟", diff:"简单", src:"common"
+  },
+  oil: {
+    mats:["干纸巾 / 爽身粉 / 玉米淀粉","洗洁精（中性）","温水（按材质上限）","干净白布"],
+    temp:"先干处理，之后温水 30～40℃（化纤 ≤40℃）",
+    steps:[
+      "绝对不要先沾水：用干纸巾按压吸油，或撒爽身粉 / 玉米淀粉静置 15 分钟吸附后刷掉。",
+      "在污渍处滴少量洗洁精原液，用指腹或软毛刷由外向内打圈乳化 1～2 分钟。",
+      "静置 5 分钟后，用材质允许温度的温水从背面冲，让乳化后的油脂被带走。",
+      "按洗标正常洗涤；洗前对着光检查，油迹未净就重复一次，切勿直接烘干。"
+    ],
+    dos:["油渍越新越好处理，先吸后洗是关键","洗洁精对食用油 / 化妆品油脂最通用","处理后单独洗一次，避免油脂蹭到其它衣物"],
+    donts:["不要一上来就用热水冲，会把油脂摊开并压进纤维","不要用酒精 / 丙酮擦化纤与涂层，可能溶解面料","不要在油渍未净时烘干或熨烫"],
+    alt:"口红 / 粉底可先用卸妆湿巾轻按（先在隐蔽处试），再用洗洁精乳化；机油类建议送洗。",
+    time:"约 20～30 分钟", diff:"中等", src:"common"
+  },
+  pigment: {
+    mats:["干纸巾 / 吸水布","医用酒精（仅棉麻、瓷砖）","中性洗衣液","干净白布","小苏打糊"],
+    temp:"冷水为主，避免高温定型",
+    steps:[
+      "先判断是湿性墨水还是干性颗粒：湿的用干布按压吸附，干的（泥、蜡笔）先轻刷掉表层，绝对不要揉搓。",
+      "污渍下垫白布，用棉签蘸少量对应溶剂从外缘向中心点按，让色素转移到白布上，随时换干净面。",
+      "每处理一步就用冷水轻拍吸净，观察是否变淡；变淡就重复，不变化就换方案而不是加大力气。",
+      "最后中性洗衣液轻拍 + 冷水漂净，确认无痕后再按洗标洗涤。"
+    ],
+    dos:["点按吸附优于擦拭，防止把颜料压进纤维","溶剂一次只用一种，用完彻底漂净再换另一种","泥渍一定先完全干透再刷，湿刷会扩大污染面"],
+    donts:["不要揉搓、不要用热水，会让颜料固着","不要把酒精 / 丙酮用到化纤、涂层、皮革、真丝上","不要混合多种溶剂，可能产生有害气体或损伤面料"],
+    alt:"马克笔 / 圆珠笔可用酒精点按（限棉麻与硬面）；指甲油含丙酮，化纤与涂层禁用，建议送洗。",
+    time:"约 20～40 分钟", diff:"较难", src:"common"
+  },
+  adhesive: {
+    mats:["冰袋 / 冰块（装袋）","钝刀背或塑料卡片","植物油 / 护手霜","中性洗衣液","干净白布"],
+    temp:"降温处理为主，之后冷水",
+    steps:[
+      "口香糖 / 胶块：用装袋冰袋冷敷 10～15 分钟使其变硬变脆，再用钝刀背从边缘轻轻撬起，别硬撕带下纤维。",
+      "残胶 / 贴纸：先用吹风机低温远距离稍微加温软化，边揭边用塑料卡片辅助，尽量整片揭下。",
+      "剩余黏层用植物油或护手霜敷 5 分钟软化，用白布由外向内擦，再用洗洁精把油洗掉。",
+      "冷水 + 中性洗衣液轻拍漂净，按洗标洗涤；确认无黏感再晾干。"
+    ],
+    dos:["冷冻法对织物上的口香糖最安全","揭胶时顺着毛向慢揭，减少残留","油类软化后必须再用洗洁精去油，否则会留新油渍"],
+    donts:["不要在胶还软黏时用力撕，会带走纤维 / 掉漆 / 起毛","不要用香蕉水、丙酮等强溶剂处理墙面与化纤","不要用热水泡口香糖，会使其更黏更渗入"],
+    alt:"502 瞬间胶属硬质固化胶，家庭处理极易损伤物品，建议直接送专业清洗或用厂家指定解胶剂。",
+    time:"约 20～30 分钟", diff:"中等", src:"common"
+  },
+  other: {
+    mats:["一次性手套","专用清洁剂（除霉剂 / 草酸类除锈剂 / 酶类除尿剂，按污渍择一）","干净白布","清水"],
+    temp:"按清洁剂说明，通常冷水",
+    steps:[
+      "先辨识污渍：霉斑（黑绿点状）、锈渍（橙褐）、尿渍（黄圈带味）、蜡（硬质凸起）—— 四类处理完全不同，不要用同一瓶药。",
+      "先做干燥态机械去除：霉斑用软刷轻刷掉表面孢子、蜡用冰袋冻硬后剥、锈渍先刮掉浮层。",
+      "选择对应专用剂，只在不显眼处试过无异常后少量点涂，按说明控制作用时间，绝不自混配方。",
+      "彻底清水擦净 / 漂净并保持通风干燥；霉斑与尿渍的重点是除湿和除味，否则会反复出现。"
+    ],
+    dos:["霉斑处理戴手套、开窗通风，先除湿再清洁","尿渍用酶类清洁剂而非香味遮盖剂","锈渍用还原型 / 草酸类除锈剂，仅限白色织物与瓷砖"],
+    donts:["严禁把除霉剂（多含次氯酸盐）与酸性除垢剂 / 洁厕灵混用，会产生有毒氯气","不要用含氯漂白剂处理尿渍，可能释放刺激性气体","不要在真丝羊毛、皮革、壁纸上自行用强氧化剂"],
+    alt:"大面积霉斑（超过手掌）、渗入海绵的尿渍、贵重物品锈渍，均建议请专业清洗 / 更换，家庭处理难以根除。",
+    time:"约 30 分钟以上", diff:"较难", src:"common"
+  }
+};
+
+/* ---------- L3 安全拦截：高风险材质 + 应急止损 ---------- */
+KB.blocks = {
+  silkwool: {
+    reason:"真丝 / 羊毛属蛋白质纤维，遇热水、碱性、机械力会缩水、毡化、失去光泽，家庭去渍风险高于污渍本身。",
+    emergency:[
+      "仅用干的白布 / 纸巾从外缘向中心按压吸走表层，绝不揉搓、不刷。",
+      "若是液体污渍，可在背面垫干布、用极少量冷水点按，但不要浸湿整片。",
+      "保持平铺阴干，不要拧、不要挂、不要吹风机热风。",
+      "尽快送专业干洗，并明确告知污渍类型与已做过的处理。"
+    ]
+  },
+  leather: {
+    reason:"皮革 / 绒面遇水会变硬、褪色、留水圈，酒精与溶剂会破坏表面涂层，且皮沙发多不可拆洗。",
+    emergency:[
+      "液体立即用干布按压吸干，固体用软卡片轻轻刮起，不要擦。",
+      "不要自行用水、酒精、皮革清洁剂混合试用；绒面只能用专用橡皮 / 软刷干处理。",
+      "保持通风阴干，避免暴晒和热源。",
+      "交由皮革专业护理，或联系家具 / 鞋类厂家的售后清洁建议。"
+    ]
+  },
+  wallpaper: {
+    reason:"壁纸 / 墙布遇水即起翘、褪色、鼓包，胶层遇溶剂会溶解，几乎不存在可自行恢复的去渍手段。",
+    emergency:[
+      "仅用干燥的软毛刷或干净橡皮轻轻处理表面浮尘 / 干颗粒，不要蘸任何液体。",
+      "液体污渍用干纸巾按压吸走，不要来回擦。",
+      "拍照记录，联系壁纸厂家索取对应型号的清洁说明，或准备局部更换同批次墙纸。"
+    ]
+  },
+  upholstery: {
+    reason:"布艺 / 科技布沙发不可拆洗，水分渗入海绵会发霉并留下水圈，且多数坐垫套禁止机洗。",
+    emergency:[
+      "用干布按压吸走液体，固体用勺背 / 软卡片轻轻刮起，绝对不要灌水或浸泡。",
+      "仅用拧到极干的白布点按污染外缘，控制湿度，随时换干净面。",
+      "用风扇 / 开窗彻底吹干，避免坐垫内部受潮发霉。",
+      "大面积、渗入海绵或有异味的污渍，请专业上门布艺清洗。"
+    ]
+  }
+};
+
+/* ---------- L1 专属方案矩阵：污渍族 × 材质族 ----------
+   字段以族级 base 为底继承，仅覆盖差异项；donts / dos 为追加。
+   f=污渍族  m=材质族  s=仅对指定污渍 id 生效（可选，优先级最高）       */
+KB.solutions = [
+  /* ===== 棉 / 麻 ===== */
+  {f:"protein",m:"cotton",t:"血渍 · 棉麻校服 / 白衬衫",temp:"全程冷水 ≤30℃",
+   steps:["干布按压吸走表层血，不要擦。","背面垫干布，冷水从背面持续冲 2 分钟。","中性洗衣液原液点涂，指腹轻拍 3 分钟，静置 10 分钟。","白色棉麻可在血痕处点 3% 双氧水，起泡后用冷水冲净；彩色衣物跳过此步。","冷水漂净，确认无痕再按洗标洗涤。"],
+   donts:["绝对不能用热水，血渍遇热凝固后基本无法去除","不要用含氯漂白剂泡彩色衣物"],
+   alt:"陈旧血渍：冷水加少量食盐浸泡 30 分钟后再拍洗；仍不净就别硬洗，送洗更划算。",diff:"简单",note:"白色棉麻是本组合里唯一可用氧化剂的材质"},
+  {f:"tannin",m:"cotton",t:"咖啡 / 茶 / 果汁 · 棉麻",temp:"先冷水，去渍后可用 40～60℃",
+   steps:["干布按压吸液，番茄酱类固体用勺背刮起。","冷水从背面冲 1～2 分钟。","中性洗衣液点涂轻拍，静置 10 分钟后冷水漂。","仍有色素：白色棉麻用氧系彩漂按说明浸泡 30 分钟；彩色衣物改用甘油敷 10 分钟再洗。"],
+   donts:["不要先打肥皂，碱会让单宁固色","不要用热水冲第一遍"],
+   alt:"红酒可先撒食盐吸附 5 分钟再冷水冲；陈旧鞣酸渍可用氧系漂白剂，别用含氯漂白剂原液。",diff:"简单"},
+  {f:"oil",m:"cotton",t:"食用油 / 辣椒油 · 棉麻",temp:"干处理后 60℃ 温水",
+   steps:["撒玉米淀粉或爽身粉静置 15 分钟吸油，刷掉粉末。","洗洁精原液点涂，指腹打圈乳化 2 分钟。","静置 5 分钟，用 60℃ 温水从背面冲（棉麻耐温，去油更彻底）。","对光检查，仍有油影就重复一次，再按洗标洗涤。"],
+   donts:["不要先沾水","不要在油渍未净时烘干"],
+   alt:"辣椒油红色素残留可按鞣酸色素类再处理一次（甘油 / 氧系彩漂）。",diff:"简单"},
+  {f:"pigment",m:"cotton",t:"圆珠笔 / 墨水 / 蜡笔 · 棉麻",temp:"冷水，溶剂常温",
+   steps:["干颗粒（蜡笔、泥）先轻刷掉表层；湿墨水用干布按压吸。","污渍下垫白布，棉签蘸医用酒精从外缘向中心点按，随时换干净布面。","每点按一轮用冷水轻拍吸净，观察是否变淡，变淡才重复。","色素淡化后中性洗衣液轻拍 + 冷水漂净，再正常洗涤。"],
+   donts:["不要揉搓，会把颜料压进纤维","不要用热水"],
+   alt:"水性马克笔可先用冷水 + 洗衣液，油性再上酒精；指甲油含丙酮，棉麻也要先在隐蔽处试。",diff:"较难",note:"酒精仅用于本组合与瓷砖硬面"},
+  {f:"adhesive",m:"cotton",t:"口香糖 / 贴纸胶 · 棉麻",temp:"冷冻 → 冷水",
+   steps:["装袋冰袋冷敷 10～15 分钟，让胶变硬变脆。","用钝刀背从边缘轻轻撬起整块，别硬撕。","残胶用植物油敷 5 分钟软化，白布由外向内擦。","洗洁精把油洗掉，再冷水 + 洗衣液漂净。"],
+   donts:["不要用热水泡口香糖","不要用香蕉水等强溶剂"],
+   alt:"502 固化胶建议直接送洗，家庭处理容易连纤维一起撕下。",diff:"中等"},
+  {f:"other",m:"cotton",t:"霉斑 / 锈渍 · 白色棉麻",temp:"按专用剂说明，通常冷水",
+   steps:["戴手套、开窗，干刷掉表面霉孢子（户外刷，避免孢子飘散室内）。","白色棉麻霉斑用氧系彩漂按说明浸泡（不用含氯漂白剂原液）；锈渍改用草酸类除锈剂点涂。","作用时间严格按说明，中途观察，不自行加量或混药。","彻底漂净后日晒晾干，并解决存放环境潮湿问题，否则会复发。"],
+   donts:["严禁除霉剂与洁厕灵 / 醋 / 酸性除垢剂混用","彩色衣物不要用草酸类除锈剂","不要用含氯漂白剂处理尿渍"],
+   alt:"大面积霉斑或彩色面料建议送洗；除霉重点是除湿通风而不是反复漂。",diff:"较难"},
+
+  /* ===== 化纤 / 混纺 ===== */
+  {f:"protein",m:"synthetic",t:"奶渍 / 汗渍 · 化纤运动衣",temp:"冷水 ≤30℃",
+   steps:["干布按压吸走表层。","冷水从背面冲 2 分钟。","中性洗衣液点涂轻拍，静置 10 分钟；领口黄渍可加少量小苏打糊敷 5 分钟。","冷水漂净，30℃ 以下洗涤，不要高温烘干。"],
+   donts:["不要用热水","不要用含酶洗衣粉长时间泡真丝羊毛（本组合为化纤可用，但水温仍须低）","不要用烘干机，余热会让残留蛋白固着"],
+   alt:"汗渍黄印反复出现时，改用氧系彩漂按说明短时浸泡，勿用含氯漂白剂。",diff:"简单"},
+  {f:"tannin",m:"synthetic",t:"果汁 / 可乐 · 化纤校服",temp:"冷水 → 不超过 40℃",
+   steps:["干布按压吸液，别擦。","冷水从背面冲 1～2 分钟。","中性洗衣液点涂轻拍，静置 5 分钟，冷水漂。","仍有色素用甘油敷 10 分钟后再洗，忌用含氯漂白剂。"],
+   donts:["不要用热水（化纤遇热更易固色且易变形）","不要用丙酮 / 酒精等强溶剂，会溶解部分化纤涂层"],
+   alt:"聚酯纤维对色素吸附较强，陈旧果汁渍建议尽早送洗。",diff:"简单"},
+  {f:"oil",m:"synthetic",t:"口红 / 粉底 · 化纤衣物",temp:"干处理 → 40℃ 温水",
+   steps:["先用干纸巾按压吸油，撒爽身粉静置 10 分钟吸附后刷掉。","卸妆湿巾在隐蔽处试过不褪色后，轻按（不是擦）带走表层色料。","洗洁精原液打圈乳化 2 分钟，静置 5 分钟。","40℃ 温水从背面冲净，对光检查后再洗涤。"],
+   donts:["不要用酒精 / 丙酮，化纤与防水涂层会被溶解","水温不要超过 40℃，不要高温烘干"],
+   alt:"机油、链条油属重油，化纤吸附后基本无法彻底去除，建议送洗。",diff:"中等",note:"小孩衣物若接触化妆品，务必多漂洗一遍"},
+  {f:"pigment",m:"synthetic",t:"马克笔 / 中性笔 · 化纤",temp:"冷水",
+   steps:["干布按压吸走湿墨，干颗粒轻刷掉表层。","禁用酒精与丙酮：改用中性洗衣液原液 + 冷水，棉签点按转移色素。","小苏打糊（小苏打加少量水）敷 5 分钟，白布点按吸附，再冷水吸净。","重复观察，色素变淡才继续，最后按洗标低温洗涤。"],
+   donts:["严禁酒精、丙酮、香蕉水 —— 会溶解 / 发白化纤面料","不要揉搓、不要用热水"],
+   alt:"化纤上油性笔迹家庭去除率有限，建议尽早送洗并说明笔迹类型。",diff:"较难"},
+  {f:"adhesive",m:"synthetic",t:"贴纸胶 / 双面胶 · 化纤",temp:"降温 → 冷水",
+   steps:["冰袋冷敷 10 分钟让胶变脆，塑料卡片从边缘慢慢揭。","残余黏层用护手霜或植物油敷 5 分钟软化（先在隐蔽处试）。","白布由外向内擦，再用洗洁精把油彻底洗掉。","冷水漂净，低温洗涤；不要用吹风机高温吹化纤。"],
+   donts:["不要用吹风机高温，化纤易变形","不要用强溶剂"],
+   alt:"大面积胶痕建议连衣物一起送洗，避免自行处理留下发白硬块。",diff:"中等"},
+  {f:"other",m:"synthetic",t:"尿渍 / 霉点 · 化纤",temp:"冷水",
+   steps:["干布吸走表层液体。","用酶类宠物 / 尿渍清洁剂按说明点涂，作用时间不要随意延长。","冷水充分漂净，多漂一遍，避免残留刺激皮肤。","彻底晾干并保持通风；霉点反复出现说明存放环境潮湿。"],
+   donts:["不要用含氯漂白剂处理尿渍","不要把酶类清洁剂与含氯 / 酸性清洁剂混用"],
+   alt:"渗入海绵或大面积异味请专业处理；香味遮盖剂不解决问题。",diff:"中等"},
+
+  /* ===== 瓷砖 / 玻璃 / 硬质面 ===== */
+  {f:"protein",m:"tile",t:"血渍 / 蛋液 · 瓷砖地面",temp:"冷水",
+   steps:["用一次性纸巾按压吸走表层，固体用卡片刮起。","冷水 + 中性清洁剂擦净，不要直接拿热水冲。","用干净湿布擦去洗涤剂残留，干布擦干。","处理纸巾密封丢弃，地面再擦一遍消毒（血渍场景）。"],
+   donts:["不要先用热水","不要在同一区域把含氯消毒液与洁厕灵叠加使用"],
+   alt:"瓷砖缝渗入色素可用氧系漂白剂糊敷，先在不显眼处试。",diff:"简单"},
+  {f:"tannin",m:"tile",t:"咖啡 / 红酒 · 台面瓷砖",temp:"不限，先冷水",
+   steps:["干布吸液，固体刮起。","湿布 + 中性清洁剂由外向内擦，避免扩大污染面。","缝隙残留色素用小苏打糊敷 5 分钟，软刷轻刷后擦净。","干布擦干，检查缝隙是否还有渗色。"],
+   donts:["不要用钢丝球抛光照面砖，会留划痕","强酸与含氯漂白剂严禁混用"],
+   alt:"陈旧色素可在缝隙用氧系漂白剂糊，作用后彻底冲净。",diff:"简单"},
+  {f:"oil",m:"tile",t:"重油污 / 辣椒油 · 厨房瓷砖",temp:"温水 40～60℃",
+   steps:["干纸巾先吸油，撒小苏打或面粉静置 10 分钟吸附。","洗洁精原液 + 温水，用软海绵打圈乳化。","温水擦净，干布擦干；油膜未净重复一次。","墙面油渍由上往下擦，避免污水流到已清洁区。"],
+   donts:["不要把强碱油烟净与洁厕灵 / 酸性除垢剂混用"],
+   alt:"缝隙油垢可用小苏打糊敷 10 分钟再软刷；哑光砖先试避免发白。",diff:"简单"},
+  {f:"pigment",m:"tile",t:"马克笔 / 指甲油 · 瓷砖",temp:"常温",
+   steps:["先干布按压，不要用湿布把颜料摊开。","棉签蘸医用酒精（油性马克笔）或丙酮（仅指甲油、仅光面砖）从外缘点按。","随时换干净棉签，色素转移到棉签上而不是被擦开。","中性清洁剂擦净残留溶剂，干布擦干。"],
+   donts:["不要在哑光 / 仿古砖上用丙酮，可能溶蚀表面","溶剂远离火源，保持通风","不要把酒精与含氯漂白剂混用"],
+   alt:"水性笔迹用湿布 + 小苏打即可，不必上溶剂。",diff:"简单"},
+  {f:"adhesive",m:"tile",t:"不干胶 / 胶带痕 · 瓷砖",temp:"常温",
+   steps:["吹风机低温远距离加温 30 秒，从一角慢慢整片揭下。","残胶用植物油或护手霜敷 5 分钟软化。","塑料卡片轻刮，再用洗洁精把油洗掉。","湿布擦净、干布擦干。"],
+   donts:["不要用刀片刮光面砖，容易留永久划痕","不要用香蕉水在大面积使用，注意通风"],
+   alt:"固化 502 可用厂家指定解胶剂点涂，先在角落试。",diff:"简单"},
+  {f:"other",m:"tile",t:"霉斑 / 锈渍 / 水垢 · 卫浴瓷砖",temp:"常温，通风",
+   steps:["戴手套开窗，先辨类型：霉斑黑绿、锈渍橙褐、水垢白硬。","三选一，绝不混用：霉斑用除霉剂、锈渍用草酸类除锈剂、水垢用酸性除垢剂。","按说明控制作用时间，软刷轻刷后大量清水冲净。","擦干并保持通风 / 排湿，霉斑与尿渍的根源是潮湿。"],
+   donts:["严禁除霉剂（多含次氯酸盐）与洁厕灵 / 醋 / 酸性除垢剂混用 —— 会产生有毒氯气","不要在石材 / 大理石上用酸性除垢剂"],
+   alt:"硅胶缝发霉深入内部时清洁剂只能漂白表面，建议重新打胶。",diff:"中等"},
+
+  /* ===== 乳胶漆墙面 ===== */
+  {f:"protein",m:"latex",t:"汤汁 / 蛋液 · 乳胶漆墙面",temp:"微湿、冷水",
+   steps:["干纸巾按压吸走表层，固体用卡片轻轻刮起。","白布蘸极少量冷水（拧到不滴水），从外缘向中心按压吸附，不要来回擦。","换干净布面重复，每次都用按压手法。","用干布吸干水分，通风阴干；出现掉粉露底就停手。"],
+   donts:["不要大面积湿擦，乳胶漆会掉粉","不要用钢丝球、不要用强溶剂"],
+   alt:"留下印痕时建议用同色乳胶漆局部补刷，比反复擦更安全。",diff:"中等"},
+  {f:"tannin",m:"latex",t:"果汁 / 咖啡 · 乳胶漆墙面",temp:"微湿、冷水",
+   steps:["干布按压吸液，切勿擦拭扩散。","拧到极干的白布蘸冷水点按，由外向内，随时换面。","色素淡化后可用极稀的中性清洁剂点按一次，再用清水布吸净。","干布吸干，通风阴干；若掉漆 / 露底立即停止。"],
+   donts:["不要用含氯漂白剂原液，会直接漂白墙面漆","不要反复擦同一处"],
+   alt:"深色果汁渗色通常擦不掉，局部补漆是更可靠的做法。",diff:"中等",note:"本组合按 R9 规则由外向内按压"},
+  {f:"oil",m:"latex",t:"手印油 / 厨房油点 · 乳胶漆墙面",temp:"微湿",
+   steps:["干纸巾按压吸油，撒少量爽身粉静置 10 分钟后用软毛刷轻轻扫掉。","白布蘸极稀洗洁精水，拧到不滴水，点按油点，不要打圈擦。","换清水布点按吸走洗涤剂，干布吸干。","观察是否掉粉；有掉粉立刻停手，改局部补漆。"],
+   donts:["不要用强力去油喷雾，会溶蚀漆面","不要大面积湿擦"],
+   alt:"顽固油点建议直接用同色漆点补，别为一点油渍擦掉一片墙皮。",diff:"较难"},
+  {f:"pigment",m:"latex",t:"蜡笔 / 马克笔涂鸦 · 乳胶漆墙面",temp:"微湿、常温",
+   steps:["先干处理：软橡皮或干布轻擦蜡笔表层，别蘸水。","残留色痕用小苏打糊（小苏打加少量水）蘸在白布上，轻轻点按 30 秒。","用拧干的清水布吸净，干布吸干；一次不行分多次少量处理。","出现掉粉 / 露底立即停止，改局部补漆。"],
+   donts:["不要用酒精 / 丙酮大面积擦，会溶掉乳胶漆","不要用钢丝球、磨砂海绵"],
+   alt:"小孩涂鸦面积大时，局部补漆比反复清洁更省事也更安全。",diff:"较难",note:"高频场景：小孩在墙上涂画"},
+  {f:"adhesive",m:"latex",t:"贴纸 / 挂钩胶痕 · 乳胶漆墙面",temp:"常温、尽量干燥",
+   steps:["吹风机低温远距离加温 20～30 秒，从一角慢揭，尽量整片带走。","残胶用橡皮轻擦或用干布蘸极少量植物油点按（先在墙角试，可能留油印）。","立刻用干布吸干，观察是否掉漆。","掉漆 / 留印就停手，用同色漆局部补刷。"],
+   donts:["不要用湿布泡胶，乳胶漆遇水会起皮","不要用解胶剂 / 香蕉水，会连带溶掉墙漆"],
+   alt:"强力挂钩胶几乎必然带下墙皮，建议接受局部补漆。",diff:"较难"},
+  {f:"other",m:"latex",t:"霉斑 · 乳胶漆墙面",temp:"常温、强通风",
+   steps:["戴手套、口罩，开窗；先干刷掉表面霉斑（用湿布会把孢子抹开）。","除霉剂按说明少量喷在布上再点按，不要直接往墙上大量喷。","作用后干布吸干，彻底通风干燥；严禁与酸性清洁剂同场使用。","排查渗水 / 冷凝 / 通风问题，否则一两周后必然复发。"],
+   donts:["严禁除霉剂与洁厕灵、醋、酸性除垢剂混用","不要在未解决潮湿源头前反复刷漆遮盖"],
+   alt:"大面积霉斑或墙体内部渗水，需先做防水 / 除湿工程，再重刷防霉漆。",diff:"较难"}
+];
+
+/* ===== 其余专属方案以 concat 追加，保持矩阵一处定义、分批维护 ===== */
+KB.solutions = KB.solutions.concat([
+  /* ===== 真丝 / 羊毛：仅限新鲜、极小面积；默认优先建议送洗 ===== */
+  {f:"protein",m:"silkwool",t:"血渍 / 奶渍 · 真丝羊毛（谨慎）",temp:"冷水 ≤30℃，仅局部点按",
+   steps:["优先选择：不做任何自行去渍，干布按压吸走表层后直接送专业干洗，并说明污渍类型。","若必须应急且面积小于指甲盖：污渍下垫干白布，用棉签蘸极少量冷水点按，绝不浸湿整片。","用干布吸干水分，平铺阴干，不拧、不挂、不吹热风。","送洗时告知店家已做过的处理，避免重复用药。"],
+   donts:["严禁热水、碱性洗衣粉、含酶洗衣粉、含氯漂白剂","严禁刷、搓、拧绞、烘干","不要用双氧水 / 彩漂自行尝试"],
+   alt:"本组合无可靠的家庭去渍手段，专业干洗是唯一稳妥选项。",diff:"高难度 / 建议送洗",caution:true,src:"label",note:"命中 R3：蛋白质纤维不可逆损伤风险"},
+  {f:"tannin",m:"silkwool",t:"咖啡 / 红酒 · 真丝羊毛（谨慎）",temp:"冷水 ≤30℃，仅局部点按",
+   steps:["干布按压吸液，绝不擦拭扩散。","优先直接送专业干洗；自行处理仅限极小面积：棉签蘸冷水点按数下，随即用干布吸干。","不要用甘油、醋、彩漂等任何家庭去渍剂自行尝试。","平铺阴干后尽快送洗。"],
+   donts:["严禁热水、碱性 / 含酶洗涤剂、彩漂、含氯漂白剂","严禁用酒精 / 溶剂"],
+   alt:"真丝羊毛上的色素渍家庭去除率极低，送洗优先。",diff:"高难度 / 建议送洗",caution:true,src:"label"},
+  {f:"oil",m:"silkwool",t:"口红 / 粉底 · 真丝羊毛（谨慎）",temp:"仅干处理",
+   steps:["用干纸巾按压吸油，撒少量爽身粉静置 10 分钟后用软刷极轻扫掉。","不要沾水、不要上洗洁精或卸妆产品，直接在隐蔽处确认无变化后送专业干洗。","告知干洗店污渍为化妆品油脂。"],
+   donts:["严禁湿处理、溶剂、卸妆湿巾","严禁烘干 / 熨烫"],
+   alt:"粉末吸附是唯一安全的家庭动作，其余交给干洗店。",diff:"高难度 / 建议送洗",caution:true,src:"label"},
+
+  /* ===== 皮革 / 绒面：只做表面干处理 ===== */
+  {f:"oil",m:"leather",t:"皮鞋 / 皮沙发油点",temp:"不可浸水，常温",
+   steps:["干纸巾按压吸油，不要擦。","光面皮：用拧到极干的白布轻点一下，立刻用干布吸干；绒面皮跳到此步 → 只用专用绒面橡皮干擦。","通风阴干，避免暴晒与热源。","之后按厂家说明使用对应皮革护理剂；出现变色 / 变硬立即送专业护理。"],
+   donts:["严禁浸水、酒精、含氯漂白剂、洗洁精","严禁用硬毛刷来回刷绒面","不要暴晒或用吹风机热风"],
+   alt:"大面积油污或渗入皮内，直接联系品牌售后 / 皮革护理店。",diff:"较难",caution:true,src:"label",note:"命中 R4"},
+  {f:"pigment",m:"leather",t:"泥点 / 干颗粒 · 鞋面",temp:"完全干燥后处理",
+   steps:["先让泥渍彻底干透，湿刷会把泥压进皮纹。","用软毛刷或干布轻轻扫掉表层颗粒。","光面皮残留痕迹用极干的白布点按；绒面用专用橡皮 / 铜丝软刷顺毛向轻刷。","仍有印痕就停止，交专业护理，不要用溶剂。"],
+   donts:["严禁湿布擦、酒精、丙酮、香蕉水","不要在泥未干时刷"],
+   alt:"圆珠笔 / 墨水渗入皮革基本不可家庭去除，建议送护理。",diff:"中等",caution:true,src:"label"},
+  {f:"adhesive",m:"leather",t:"口香糖 / 胶痕 · 鞋底与皮面",temp:"降温，绝不浸水",
+   steps:["装袋冰袋冷敷 10 分钟让胶变脆，用塑料卡片从边缘轻撬。","残胶不要上油、不要上溶剂；用干布反复轻按带走。","鞋底胶痕可用卡片刮，皮面残留一律停手。","交专业护理处理余胶。"],
+   donts:["严禁用植物油 / 护手霜软化（皮革会吸油留深色印）","严禁解胶剂、酒精"],
+   alt:"皮革上的胶类建议整体交由护理店，别为一点胶毁掉皮面涂层。",diff:"较难",caution:true,src:"label"},
+
+  /* ===== 布艺 / 科技布沙发：局部少量按压 ===== */
+  {f:"tannin",m:"upholstery",t:"果汁 / 红酒 · 布艺沙发",temp:"微湿冷水",
+   steps:["干布按压吸液，固体用勺背刮起，绝对不要灌水。","白布蘸冷水拧到不滴水，从外缘向中心点按，随时换干净面。","用干布反复按压吸走水分，风扇 / 开窗彻底吹干。","出现水圈、褪色或渗入海绵立即停手，联系专业布艺清洗。"],
+   donts:["严禁浸泡、大量灌水、蒸汽机高温","严禁含氯漂白剂原液","不要用吹风机热风对着吹"],
+   alt:"可拆洗坐垫套按洗标单独洗；不可拆洗的大面积渍直接请上门清洗。",diff:"较难",caution:true,src:"label",note:"命中 R7"},
+  {f:"protein",m:"upholstery",t:"奶渍 / 吐奶 · 布艺沙发",temp:"微湿冷水",
+   steps:["干布按压吸走表层，不要擦。","拧到极干的白布蘸冷水点按，控制湿度，避免渗进海绵。","干布吸干，用风扇彻底吹干，防止内部发霉产生异味。","有异味或大面积渗入，请专业上门清洗。"],
+   donts:["严禁用热水（蛋白凝固且会产生异味）","严禁灌水 / 浸泡"],
+   alt:"酶类清洁剂仅可在隐蔽处试过且明确标注可用于布艺时少量使用。",diff:"较难",caution:true,src:"label"},
+  {f:"oil",m:"upholstery",t:"食物油 / 护手霜 · 科技布沙发",temp:"干处理优先",
+   steps:["干纸巾按压吸油，撒爽身粉 / 玉米淀粉静置 15 分钟后用软刷吸走。","科技布表面用拧到极干的白布点按，不要打圈擦。","干布吸干并通风，观察是否留深色印。","留印或渗入即停手，交专业清洗。"],
+   donts:["严禁大量用水、洗洁精直接倒在沙发上","严禁酒精 / 溶剂（科技布涂层会被破坏）"],
+   alt:"科技布涂层怕溶剂，宁可留一点印也别把涂层擦掉。",diff:"较难",caution:true,src:"label"},
+  {f:"other",m:"upholstery",t:"尿渍 / 宠物尿 · 布艺沙发",temp:"冷水、少量",
+   steps:["干布尽量按压吸走液体，越早越好。","用标注可用于布艺的酶类除尿剂少量点按（先在沙发背面试），不要灌水。","干布反复吸干，风扇长时间吹干海绵层，保持通风。","异味未消说明已渗入海绵，请专业上门做抽洗。"],
+   donts:["严禁用含氯漂白剂处理尿渍","严禁香味遮盖剂代替除味","严禁蒸汽高温"],
+   alt:"渗入海绵的尿渍家庭几乎无法根除，专业抽洗是唯一有效方案。",diff:"较难",caution:true,src:"label"},
+
+  /* ===== 壁纸 / 墙布：只给干燥应急 ===== */
+  {f:"pigment",m:"wallpaper",t:"蜡笔 / 干颗粒 · 壁纸",temp:"完全干燥，禁用任何液体",
+   steps:["用干净软橡皮或干软毛刷，极轻轻处理表面浮痕，边做边看是否掉色。","一旦出现掉色、起毛、起翘立即停手。","拍照记录，联系厂家索取对应型号清洁说明，或准备局部更换同批次墙纸。"],
+   donts:["严禁水、湿布、湿巾","严禁酒精、溶剂、橡皮用力擦"],
+   alt:"壁纸去渍基本等于换壁纸，局部更换比清洁更可靠。",diff:"高难度 / 建议送洗",caution:true,src:"label",note:"命中 R6"},
+  {f:"adhesive",m:"wallpaper",t:"贴纸 / 挂钩胶 · 壁纸",temp:"完全干燥",
+   steps:["不要自行揭：强行揭胶几乎必然带下墙纸面层。","可用低温吹风机远距离稍微加温，从一角试揭，有任何撕裂迹象立即停止。","联系壁纸厂家或施工方，准备局部更换同批次墙纸。"],
+   donts:["严禁解胶剂、酒精、水、蒸汽","严禁硬刮"],
+   alt:"挂钩 / 强力胶痕建议直接局部换纸。",diff:"高难度 / 建议送洗",caution:true,src:"label"},
+
+  /* ===== 高频具体场景（按污渍 id 精确优先） ===== */
+  {f:"pigment",m:"synthetic",s:["mud"],t:"运动鞋泥渍 · 网面 / 飞织",temp:"完全干透后冷水",
+   steps:["先让泥彻底干透，湿刷会把泥压进网眼。","用软毛刷 / 旧牙刷轻轻刷掉干泥块，鞋内塞纸保持形状。","中性洗衣液加冷水，用软布点按残留痕，不要整鞋泡水。","冷水擦净洗涤剂，塞纸巾阴干，绝不暴晒、绝不烘干。"],
+   donts:["不要在泥未干时刷","不要整鞋浸泡、不要用烘干机 / 暖气烤"],
+   alt:"鞋底缝隙可用软刷单独清理；网面泛黄属氧化，不是泥渍，别反复刷。",diff:"简单",note:"鞋类高频场景"},
+  {f:"tannin",m:"cotton",s:["ketchup"],t:"番茄酱 · 小孩校服",temp:"先冷水 → 40℃",
+   steps:["用勺背把固体酱料轻轻刮起，不要抹开。","冷水从背面冲 1～2 分钟稀释色素。","中性洗衣液 / 婴儿洗衣液点涂轻拍，静置 10 分钟。","仍有红痕用甘油敷 10 分钟再洗；小孩衣物最后多漂洗两遍，确保无残留。"],
+   donts:["不要用热水，番茄色素遇热固着","不要用含氯漂白剂泡彩色校服","不要用刺激性溶剂"],
+   alt:"白色校服可改用氧系彩漂按说明浸泡，勿用 84 原液。",diff:"简单",note:"命中 R5：儿童衣物需充分漂洗"},
+  {f:"adhesive",m:"cotton",s:["gum"],t:"口香糖 · 小孩裤腿 / 衣袖",temp:"冷冻 → 冷水",
+   steps:["把衣物装袋放冷冻室 30 分钟，或冰袋冷敷 15 分钟，让口香糖完全变硬。","取出后立刻从边缘掰 / 撬起整块，动作要快，化软就再冻一次。","残胶用植物油敷 5 分钟，白布由外向内擦，再用洗洁精把油洗掉。","中性洗衣液 + 冷水漂净，多漂一遍再晾。"],
+   donts:["不要用热水 / 吹风机加热，会让它更黏更渗入","不要硬撕带下纤维"],
+   alt:"头发上的口香糖同理用油软化，但衣物优先冷冻法。",diff:"简单",note:"小孩高频场景"},
+  {f:"other",m:"tile",s:["rust"],t:"锈渍 · 卫浴瓷砖 / 白色织物",temp:"冷水、强通风",
+   steps:["先刮掉表面浮锈 / 浮层。","用草酸类或还原型除锈剂少量点涂，先在隐蔽处试，作用时间按说明，不自行加量。","软刷轻刷后用大量清水冲净，避免药剂残留。","擦干并排查铁件 / 水管生锈源头，否则会反复出现。"],
+   donts:["严禁与含氯漂白剂 / 洁厕灵混用","不要在彩色织物、大理石、金属镀层上使用"],
+   alt:"白色棉织物锈渍可改用柠檬酸加食盐日晒法，先试不褪色再用。",diff:"中等"}
+]);
+
+/* 常用污渍快捷入口（首屏速查） */
+KB.quick = ["blood","coffee","juice","cookoil","lipstick","marker","gum","mud","mold","urine"];
+
+/* 族 → 名称 / 颜色的快速索引，由 init 构建 */
+KB.famMap = {};
+KB.stainMap = {};
+KB.matMap = {};
+KB.itemMap = {};
+
+/* ---------- 数据层：storage 读写，向上提供统一接口 ---------- */
+var LS_KEY = "wb_stain_cases_v1";
+var LS_META = "wb_stain_meta_v1";
+var DATABASE_ID = "";   /* 部署到资料库并注入 SDK 后，填入数据表 id 即自动切换在线存储 */
+
+var DS = {};
+
+/* 在线通道能力探测：SDK 由平台 iframe 注入；未注入时为纯本地模式 */
+DS.cloud = function(){
+  try{
+    var sp = window.__SMART_PAGE__;
+    if(sp && sp.database && DATABASE_ID && typeof sp.database.query === "function") return sp.database;
+  }catch(e){}
+  return null;
+};
+DS.mode = function(){ return DS.cloud() ? "online" : "local"; };
+
+/* 日期工具：一律用本地日期字符串，避免时区与跨月跨年误差 */
+function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+function dateStr(d){ return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+function todayStr(){ return dateStr(new Date()); }
+function shiftDays(n){ var d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+n); return dateStr(d); }
+function diffDays(a,b){ // a - b，单位天
+  var pa = a.split("-"), pb = b.split("-");
+  var da = Date.UTC(+pa[0],+pa[1]-1,+pa[2]), db = Date.UTC(+pb[0],+pb[1]-1,+pb[2]);
+  return Math.round((da-db)/86400000);
+}
+function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
+}
+function svgIco(name,color,size){
+  var s = size||16, c = color||"currentColor";
+  var P = {
+    check:'<polyline points="20 6 9 17 4 12"/>',
+    alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>',
+    doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+    drop:'<path d="M12 2.7c0 0-5.6 6.4-5.6 10.4a5.6 5.6 0 0 0 11.2 0C17.6 9.1 12 2.7 12 2.7Z"/>',
+    star:'<polygon points="12 2 15.1 8.6 22 9.6 17 14.5 18.2 21.4 12 18 5.8 21.4 7 14.5 2 9.6 8.9 8.6 12 2"/>',
+    plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>',
+    arrow:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+    flask:'<path d="M9 3h6M10 3v6L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9V3"/><line x1="7" y1="15" x2="17" y2="15"/>',
+    shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>',
+    list:'<path d="M8 6h13M8 12h13M8 18h13"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>'
+  };
+  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(P[name]||P.drop)+'</svg>';
+}
+
+/* 预置示例数据：4 条，其中 1 条逾期；全部带 demo 标记便于一键清空 */
+DS.demoCases = function(){
+  return [
+    { id:"demo1", date:shiftDays(-3), itemId:"kid", materialId:"cotton", stainId:"ketchup", due:shiftDays(-2),
+      status:"todo", effect:"", note:"午饭蹭到校服袖口，明天要穿，得先处理", mine:false, demo:true, title:"小孩校服 · 番茄酱" },
+    { id:"demo2", date:shiftDays(-1), itemId:"sofa", materialId:"upholstery", stainId:"juice", due:todayStr(),
+      status:"todo", effect:"", note:"沙发扶手上泼了葡萄汁，还没敢用水", mine:false, demo:true, title:"布艺沙发 · 果汁" },
+    { id:"demo3", date:shiftDays(-5), itemId:"adult", materialId:"cotton", stainId:"coffee", due:shiftDays(-4),
+      status:"done", effect:"有效", note:"冷水冲背面 + 洗衣液点拍，一次就干净了", mine:true, demo:true, title:"大人衬衫 · 咖啡" },
+    { id:"demo4", date:todayStr(), itemId:"shoes", materialId:"synthetic", stainId:"mud", due:shiftDays(1),
+      status:"doing", effect:"", note:"运动鞋泥已干透，等刷掉表层", mine:false, demo:true, title:"运动鞋 · 泥渍" }
+  ];
+};
+
+DS.read = function(){
+  var raw;
+  try{ raw = localStorage.getItem(LS_KEY); }catch(e){ raw = null; }
+  if(raw){
+    try{ var arr = JSON.parse(raw); if(Array.isArray(arr)) return arr; }catch(e){}
+  }
+  /* 首次打开：写入示例数据，绝不空白 */
+  var demo = DS.demoCases();
+  DS.write(demo);
+  try{ localStorage.setItem(LS_META, JSON.stringify({ seeded:true, created:todayStr() })); }catch(e){}
+  return demo;
+};
+DS.write = function(arr){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(arr)); return true; }catch(e){ return false; }
+};
+DS.all = function(){ return DS.read().slice(); };
+
+/* 在线模式：分页拉全量，防死循环（游标必须前进） */
+DS.cloudLoadAll = function(db,cur,acc,guard){
+  acc = acc || []; guard = guard || 0;
+  if(guard > 100) return Promise.resolve(acc);
+  return db.query({ databaseId:DATABASE_ID, pageSize:200, startCursor:cur }).then(function(r){
+    var rows = (r && r.results) || [];
+    acc = acc.concat(rows.map(function(x){ return DS.fromRow(x); }));
+    var nxt = r && r.nextCursor;
+    if(r && r.hasMore && nxt && nxt !== cur && rows.length) return DS.cloudLoadAll(db,nxt,acc,guard+1);
+    return acc;
+  });
+};
+/* 在线行 → 本地 case 结构（用「备注」承载扩展字段，保证字段兼容） */
+DS.fromRow = function(row){
+  var extra = {};
+  try{ extra = JSON.parse(row["扩展"] || "{}"); }catch(e){}
+  var done = row["完成"] === true || row["状态"] === "已完成";
+  return {
+    id: row._id || uid(),
+    date: (row["日期"] || todayStr()).slice(0,10),
+    due: extra.due || (row["日期"] || todayStr()).slice(0,10),
+    itemId: extra.itemId || "kid", materialId: extra.materialId || "cotton",
+    stainId: extra.stainId || "blood", title: row["对象"] || "处理单",
+    status: done ? "done" : (row["状态"] === "处理中" ? "doing" : "todo"),
+    effect: row["效果反馈"] || "", note: row["备注"] || "", mine: !!extra.mine,
+    demo: !!extra.demo
+  };
+};
+DS.toProps = function(c){
+  return {
+    "日期": { date:c.date }, "对象": { text:c.title },
+    "状态": { select:c.status === "done" ? "已完成" : (c.status === "doing" ? "处理中" : "待处理") },
+    "完成": { checkbox:c.status === "done" },
+    "效果反馈": { select:c.effect || "未反馈" },
+    "备注": { text:c.note || "" },
+    "扩展": { text:JSON.stringify({ due:c.due,itemId:c.itemId,materialId:c.materialId,stainId:c.stainId,mine:c.mine,demo:c.demo }) }
+  };
+};
+
+/* 统一 CRUD：本地立即生效；在线模式同步落库，失败自动降级本地 */
+DS.add = function(c){
+  var arr = DS.all(); arr.unshift(c); DS.write(arr);
+  var db = DS.cloud();
+  if(db){
+    DS.setSync("syncing");
+    db.addRecord({ databaseId:DATABASE_ID, properties:DS.toProps(c) })
+      .then(function(){ DS.setSync("synced"); })
+      .catch(function(){ DS.setSync("off"); });
+  }
+  return c;
+};
+DS.update = function(id,patch){
+  var arr = DS.all(), hit = null;
+  for(var i=0;i<arr.length;i++){ if(arr[i].id === id){ for(var k in patch) arr[i][k] = patch[k]; hit = arr[i]; break; } }
+  DS.write(arr);
+  var db = DS.cloud();
+  if(db && hit){
+    DS.setSync("syncing");
+    db.updateRecord({ databaseId:DATABASE_ID, recordId:id, properties:DS.toProps(hit) })
+      .then(function(){ DS.setSync("synced"); })
+      .catch(function(){ DS.setSync("off"); });
+  }
+  return hit;
+};
+DS.remove = function(id){
+  DS.write(DS.all().filter(function(x){ return x.id !== id; }));
+  var db = DS.cloud();
+  if(db){
+    DS.setSync("syncing");
+    db.deleteRecord({ databaseId:DATABASE_ID, recordId:id })
+      .then(function(){ DS.setSync("synced"); })
+      .catch(function(){ DS.setSync("off"); });
+  }
+};
+DS.clearDemo = function(){ DS.write(DS.all().filter(function(x){ return !x.demo; })); };
+DS.clearAll = function(){ DS.write([]); };
+
+DS.setSync = function(state){
+  var el = document.getElementById("syncBadge");
+  if(!el) return;
+  el.className = "sync " + (state === "off" ? "off" : (state === "synced" ? "" : "local"));
+  var txt = { synced:"已同步", syncing:"同步中", off:"离线模式", local:"本地存储" };
+  el.innerHTML = '<i></i>' + (txt[state] || txt.local);
+};
+
+/* 备份：导出 / 导入（无条数上限） */
+DS.exportJSON = function(){
+  return JSON.stringify({
+    app:"污渍清洗方法工作台", version:1, exportedAt:new Date().toISOString(),
+    cases:DS.all(), stepDone:UI.stepDone
+  },null,2);
+};
+DS.importJSON = function(text){
+  var obj = JSON.parse(text);
+  var arr = obj && obj.cases;
+  if(!Array.isArray(arr)) throw new Error("文件格式不正确：缺少 cases 数组");
+  var clean = arr.filter(function(x){ return x && typeof x === "object" && x.id && x.date; })
+    .map(function(x){
+      return { id:String(x.id), date:x.date, due:x.due || x.date, itemId:x.itemId||"kid",
+        materialId:x.materialId||"cotton", stainId:x.stainId||"blood", title:x.title||"处理单",
+        status:x.status||"todo", effect:x.effect||"", note:x.note||"", mine:!!x.mine, demo:!!x.demo };
+    });
+  DS.write(clean);
+  if(obj.stepDone && typeof obj.stepDone === "object") UI.stepDone = obj.stepDone;
+  return clean.length;
+};
+
+/* 交互状态（不属于持久化业务数据） */
+var UI = {
+  tab:"search", itemId:"", materialId:"", familyId:"all", stainId:"", kw:"",
+  filterStatus:"all", filterFamily:"all", filterKw:"",
+  current:null, stepDone:{}, modal:null,
+  /* 拍照模块状态：仅会话内存，图片不写入 localStorage、不进备份文件 */
+  photo:{ dataUrl:"", hex:"", bgHex:"", colorSignal:"", candidates:[], source:"", vision:{"endpoint":"","key":""},
+    answers:{ color:"", state:"", feel:"", item:"kid", material:"cotton" } }
+};
+
+/* ---------- 计算层：纯函数，输入数据 → 输出结果，不碰 DOM ---------- */
+var ENGINE = {};
+
+/* 构建索引（init 阶段调用一次） */
+ENGINE.buildIndex = function(){
+  KB.famMap = {}; KB.stainMap = {}; KB.matMap = {}; KB.itemMap = {};
+  KB.families.forEach(function(f){
+    KB.famMap[f.id] = f;
+    f.stains.forEach(function(s){ KB.stainMap[s.id] = { id:s.id, name:s.name, aliases:s.aliases||[], fam:f.id, famName:f.name, color:f.color }; });
+  });
+  KB.materials.forEach(function(m){ KB.matMap[m.id] = m; });
+  KB.items.forEach(function(i){ KB.itemMap[i.id] = i; });
+};
+
+/* 依据当前载体，返回可用材质 id 列表 */
+ENGINE.materialsFor = function(itemId){
+  var it = KB.itemMap[itemId];
+  return it ? it.materials.slice() : KB.materials.map(function(m){ return m.id; });
+};
+/* 当前生效材质：未选或不在允许范围时，回落到该载体的第一个材质 */
+ENGINE.effectiveMaterial = function(){
+  var allow = ENGINE.materialsFor(UI.itemId);
+  if(UI.materialId && allow.indexOf(UI.materialId) >= 0) return UI.materialId;
+  return allow[0] || "cotton";
+};
+
+/* 命中当前适用范围的硬禁忌规则 */
+ENGINE.rulesFor = function(materialId,itemId){
+  return KB.rules.filter(function(r){
+    if(r.scope === "all") return true;
+    return r.scope.indexOf(materialId) >= 0 || (itemId && r.scope.indexOf(itemId) >= 0);
+  });
+};
+
+/* 核心：三级降级匹配，永不返回空白 */
+ENGINE.match = function(stainId, materialId, itemId){
+  var st = KB.stainMap[stainId] || KB.stainMap["blood"];
+  var mat = KB.matMap[materialId] || KB.matMap.cotton;
+  var fam = st.fam;
+  var base = KB.base[fam] || KB.base.other;
+
+  /* L1：优先「指定污渍」精确方案，其次「污渍族 × 材质族」组合方案 */
+  var exact = null, combo = null;
+  KB.solutions.forEach(function(s){
+    if(s.f !== fam || s.m !== materialId) return;
+    if(s.s && s.s.indexOf(stainId) >= 0){ exact = s; return; }
+    if(!s.s && !combo) combo = s;
+  });
+  var sol = exact || combo;
+
+  if(sol){
+    var merged = {
+      level:"L1", levelName:"专属方案", title:sol.t,
+      mats:sol.mats || base.mats, temp:sol.temp || base.temp,
+      steps:sol.steps || base.steps,
+      dos:(base.dos||[]).concat(sol.dos||[]),
+      donts:(base.donts||[]).concat(sol.donts||[]),
+      alt:sol.alt || base.alt, time:sol.time || base.time, diff:sol.diff || base.diff,
+      src:sol.src || base.src, caution:!!sol.caution, note:sol.note || "",
+      fam:fam, famName:st.famName, stain:st.name, stainId:stainId,
+      material:mat.name, materialId:materialId, itemId:itemId||"",
+      chem:KB.famMap[fam].chem, firstAid:KB.famMap[fam].firstAid
+    };
+    merged.rules = ENGINE.rulesFor(materialId,itemId);
+    merged.donts = merged.donts.concat(["本材质忌用：" + mat.avoid.join("、")]);
+    return merged;
+  }
+
+  /* L3：高风险材质且无专属方案 → 安全拦截 */
+  var block = KB.blocks[materialId];
+  if(block){
+    return {
+      level:"L3", levelName:"不建议自行处理", title:st.name + " · " + mat.name + "（安全拦截）",
+      blocked:true, reason:block.reason, emergency:block.emergency,
+      mats:["干的白布 / 纸巾","软毛刷或钝卡片"], temp:"按材质要求，通常不沾水",
+      steps:block.emergency, dos:["尽快送专业清洗，并说明污渍类型与已做过的处理"],
+      donts:mat.avoid.map(function(x){ return "严禁：" + x; }),
+      alt:"联系厂家售后 / 专业清洗，或查询该材质对应的护理标签。",
+      time:"应急 5 分钟内", diff:"建议送洗", src:"label", caution:true,
+      fam:fam, famName:st.famName, stain:st.name, stainId:stainId,
+      material:mat.name, materialId:materialId, itemId:itemId||"",
+      chem:KB.famMap[fam].chem, firstAid:KB.famMap[fam].firstAid,
+      rules:ENGINE.rulesFor(materialId,itemId), note:""
+    };
+  }
+
+  /* L2：族级通用方案 + 强制局部测试 + 材质忌用过滤 */
+  var l2 = {
+    level:"L2", levelName:"通用方案 · 需先局部测试", title:st.name + " · " + mat.name + "（同族通用方案）",
+    mats:base.mats, temp:base.temp + "；本材质上限 " + mat.tempMax,
+    steps:base.steps, dos:base.dos.slice(), donts:base.donts.slice(),
+    alt:base.alt, time:base.time, diff:base.diff, src:base.src, caution:true,
+    fam:fam, famName:st.famName, stain:st.name, stainId:stainId,
+    material:mat.name, materialId:materialId, itemId:itemId||"",
+    chem:KB.famMap[fam].chem, firstAid:KB.famMap[fam].firstAid, note:mat.note
+  };
+  l2.dos = l2.dos.concat(["本组合没有专属方案，务必先在不显眼处测试并观察 5 分钟"]);
+  l2.donts = l2.donts.concat(["本材质忌用：" + mat.avoid.join("、")]);
+  l2.rules = ENGINE.rulesFor(materialId,itemId);
+  return l2;
+};
+
+/* ---------- 拍照辅助识别：取色分桶 + 特征问答 → 可解释的候选污渍 ----------
+   纯规则、可追溯：每条命中都带理由；只从知识库已有污渍里挑候选，不臆造新结论。 */
+ENGINE.colorBucket = function(hex){
+  if(!hex) return "";
+  var r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  var mx = Math.max(r,g,b), mn = Math.min(r,g,b), d = mx-mn, v = mx, s = mx === 0 ? 0 : d/mx;
+  var h = 0;
+  if(d > 0){
+    if(mx === r) h = 60*(((g-b)/d)%6);
+    else if(mx === g) h = 60*(((b-r)/d)+2);
+    else h = 60*(((r-g)/d)+4);
+  }
+  if(h < 0) h += 360;
+  if(v < 0.22) return "dark";
+  if(s < 0.16) return v > 0.78 ? "light" : "dark";
+  if(h < 22 || h >= 335) return "red";
+  if(h < 70)  return "yellowbrown";
+  if(h < 170) return "green";
+  if(h < 300) return "blue";
+  return "red";
+};
+
+ENGINE.infer = function(a, hex){
+  var score = {}, why = {};
+  function add(ids, pts, reason){
+    ids.forEach(function(id){
+      if(!KB.stainMap[id]) return;
+      score[id] = (score[id]||0) + pts;
+      if(!why[id]) why[id] = [];
+      if(why[id].indexOf(reason) < 0) why[id].push(reason);
+    });
+  }
+  var C = {
+    red:        { p:3, ids:["blood","wine","ketchup","rust","juice"],                 why:"偏红褐：常见于血渍、红酒、番茄酱、铁锈" },
+    yellowbrown:{ p:3, ids:["coffee","tea","juice","soy","gravy","mud","urine","sweat"], why:"偏黄棕：常见于咖啡茶渍、汤汁、泥渍、汗黄" },
+    dark:       { p:3, ids:["ink","pen","marker","machine","mold","iodine","crayon"],   why:"偏深近黑：常见于笔墨、机油、霉斑、深色药水" },
+    blue:       { p:3, ids:["ink","pen","marker","crayon","iodine"],                why:"偏蓝紫：常见于墨水、圆珠笔、水彩笔、药水" },
+    green:      { p:3, ids:["marker","crayon","juice","mold"],                     why:"偏绿：常见于彩色笔、植物汁液、霉斑" },
+    light:      { p:3, ids:["milk","wax","cream","butter","gum","paint","vomit"],   why:"偏浅或近无色：常见于奶渍、蜡、胶、霜类" }
+  };
+  var F = {
+    oily:  { p:2, ids:["cookoil","machine","lipstick","makeup","butter","cream"],       why:"油亮 / 有油晕 → 更像油脂类" },
+    sticky:{ p:2, ids:["gum","sticker","tape","glue502","wax"],                      why:"发黏拉丝 → 更像胶类" },
+    powder:{ p:2, ids:["mud","crayon","makeup","mold"],                              why:"粉状颗粒 → 更像颜料颗粒类" },
+    hard:  { p:2, ids:["wax","gum","glue502","paint","crayon"],                      why:"硬块可刮 → 更像蜡 / 胶 / 涂料" },
+    plain: { p:1, ids:["coffee","tea","wine","juice","soy","sweat","urine"],          why:"像渗进去的颜色 → 更像水溶性色素" }
+  };
+  var S = {
+    fresh:{ p:1, ids:["blood","milk","vomit","juice","coffee","wine","gravy"],        why:"刚弄上还湿 → 优先按新鲜水溶性污渍处理" },
+    dry:  { p:1, ids:["blood","milk","gum","paint","rust","mud"],                    why:"已干结 → 需先软化或刮除表层" }
+  };
+  var color = a.color || ENGINE.colorBucket(hex);
+  if(C[color]) add(C[color].ids, C[color].p, C[color].why);
+  if(F[a.feel])  add(F[a.feel].ids,  F[a.feel].p,  F[a.feel].why);
+  if(S[a.state]) add(S[a.state].ids, S[a.state].p, S[a.state].why);
+
+  var ids = Object.keys(score);
+  if(!ids.length) return { empty:true, color:color, list:[] };
+  var list = ids.map(function(id){
+    var st = KB.stainMap[id], n = score[id];
+    return { id:id, name:st.name, fam:st.fam, famName:st.famName, score:n,
+      conf:n >= 5 ? "最可能" : (n >= 3 ? "也可能" : "仅供排查"),
+      cls:n >= 5 ? "hi" : (n >= 3 ? "mid" : "low"),
+      reasons:why[id].slice(0,3), firstAid:KB.famMap[st.fam].firstAid, chem:KB.famMap[st.fam].chem };
+  }).sort(function(x,y){ return y.score - x.score || (x.id < y.id ? -1 : 1); }).slice(0,6);
+  return { empty:false, color:color, list:list };
+};
+
+/* 结果区应展示哪些污渍 */
+ENGINE.visibleStains = function(){
+  var all = Object.keys(KB.stainMap).map(function(k){ return KB.stainMap[k]; });
+  if(UI.stainId) return all.filter(function(s){ return s.id === UI.stainId; });
+  var kw = UI.kw.trim().toLowerCase();
+  if(kw){
+    return all.filter(function(s){
+      if(s.name.toLowerCase().indexOf(kw) >= 0) return true;
+      if(s.famName.toLowerCase().indexOf(kw) >= 0) return true;
+      return s.aliases.some(function(a){ return a.toLowerCase().indexOf(kw) >= 0; });
+    });
+  }
+  if(UI.familyId && UI.familyId !== "all") return all.filter(function(s){ return s.fam === UI.familyId; });
+  /* 默认只展示高频污渍，避免首屏卡片过多 */
+  return KB.quick.map(function(id){ return KB.stainMap[id]; }).filter(Boolean);
+};
+
+/* 今天要处理：未完成且到期日 <= 今天（昨天没做完自动顺延，不消失） */
+ENGINE.todayCases = function(){
+  var t = todayStr();
+  return DS.all().filter(function(c){
+    return c.status !== "done" && diffDays(c.due,t) <= 0;
+  }).sort(function(a,b){ return a.due < b.due ? -1 : (a.due > b.due ? 1 : 0); });
+};
+/* 即将到期：未来 3 天内 */
+ENGINE.soonCases = function(){
+  var t = todayStr();
+  return DS.all().filter(function(c){
+    var d = diffDays(c.due,t);
+    return c.status !== "done" && d > 0 && d <= 3;
+  });
+};
+
+/* 记录筛选 */
+ENGINE.filteredRecords = function(){
+  var kw = UI.filterKw.trim().toLowerCase();
+  return DS.all().filter(function(c){
+    if(UI.filterStatus !== "all" && c.status !== UI.filterStatus) return false;
+    var st = KB.stainMap[c.stainId];
+    if(UI.filterFamily !== "all" && (!st || st.fam !== UI.filterFamily)) return false;
+    if(kw){
+      var hay = [c.title, c.note, st?st.name:"", st?st.famName:"", KB.matMap[c.materialId]?KB.matMap[c.materialId].name:""].join(" ").toLowerCase();
+      if(hay.indexOf(kw) < 0) return false;
+    }
+    return true;
+  }).sort(function(a,b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); });
+};
+
+/* 统计：总数 / 已完成 / 待处理 / 我家实测 / 各族分布 */
+ENGINE.stats = function(){
+  var all = DS.all();
+  var byFam = {};
+  KB.families.forEach(function(f){ byFam[f.id] = 0; });
+  all.forEach(function(c){
+    var st = KB.stainMap[c.stainId];
+    if(st && byFam[st.fam] !== undefined) byFam[st.fam]++;
+  });
+  return {
+    total:all.length,
+    done:all.filter(function(c){ return c.status === "done"; }).length,
+    todo:all.filter(function(c){ return c.status !== "done"; }).length,
+    mine:all.filter(function(c){ return c.mine; }).length,
+    byFam:byFam
+  };
+};
+
+/* ---------- 渲染层：各函数只读取 DS / UI / ENGINE，彼此严禁互调 ---------- */
+var R = {};
+
+function toast(msg){
+  var el = document.getElementById("toast");
+  el.textContent = msg; el.className = "toast show";
+  clearTimeout(toast._t); toast._t = setTimeout(function(){ el.className = "toast"; }, 2200);
+}
+function openModal(html){ document.getElementById("modalRoot").innerHTML = '<div class="mask" id="mask"><div class="modal">'+html+'</div></div>'; }
+function closeModal(){ document.getElementById("modalRoot").innerHTML = ""; }
+function badgeCls(l){ return l === "L1" ? "b-l1" : (l === "L2" ? "b-l2" : "b-l3"); }
+function statusName(s){ return s === "done" ? "已完成" : (s === "doing" ? "处理中" : "待处理"); }
+function statusBadge(s){ return s === "done" ? "b-l1" : (s === "doing" ? "b-blue" : "b-l2"); }
+
+/* 三步筛选 chips */
+R.chips = function(){
+  var iHtml = '<button type="button" class="chip'+(UI.itemId?"":" on")+'" data-act="item" data-id="">不限</button>';
+  KB.items.forEach(function(i){
+    iHtml += '<button type="button" class="chip'+(UI.itemId===i.id?" on":"")+'" data-act="item" data-id="'+i.id+'">'+esc(i.name)+'</button>';
+  });
+  document.getElementById("itemChips").innerHTML = iHtml;
+
+  var allow = ENGINE.materialsFor(UI.itemId);
+  var eff = ENGINE.effectiveMaterial();
+  var mHtml = "";
+  allow.forEach(function(mid){
+    var m = KB.matMap[mid];
+    var risk = m.risk === "high" ? '<small>高风险</small>' : (m.risk === "mid" ? '<small>需谨慎</small>' : '');
+    mHtml += '<button type="button" class="chip'+(eff===mid?" on":"")+'" data-act="material" data-id="'+mid+'">'+esc(m.name)+risk+'</button>';
+  });
+  document.getElementById("materialChips").innerHTML = mHtml ||
+    '<span class="sub" style="color:var(--muted);font-size:12.5px">请先选择载体</span>';
+
+  /* 污渍族 + 具体污渍两行 */
+  var fHtml = '<button type="button" class="chip'+(UI.familyId==="all"?" on":"")+'" data-act="family" data-id="all">全部族</button>';
+  KB.families.forEach(function(f){
+    fHtml += '<button type="button" class="chip'+(UI.familyId===f.id?" on":"")+'" data-act="family" data-id="'+f.id+'">'+esc(f.name)+'</button>';
+  });
+  var sHtml = '<button type="button" class="chip'+(UI.stainId?"":" on")+'" data-act="stain" data-id="">全部污渍</button>';
+  var stList = (UI.familyId && UI.familyId !== "all")
+    ? (KB.famMap[UI.familyId] ? KB.famMap[UI.familyId].stains : [])
+    : KB.quick.map(function(id){ return KB.stainMap[id] && {id:id,name:KB.stainMap[id].name}; }).filter(Boolean);
+  stList.forEach(function(s){
+    sHtml += '<button type="button" class="chip'+(UI.stainId===s.id?" on":"")+'" data-act="stain" data-id="'+s.id+'">'+esc(s.name)+'</button>';
+  });
+  document.getElementById("stainChips").innerHTML =
+    '<div class="chips" style="margin-bottom:8px">'+fHtml+'</div><div class="chips">'+sHtml+'</div>';
+};
+
+/* 结果卡片 */
+R.result = function(){
+  var mid = ENGINE.effectiveMaterial();
+  var list = ENGINE.visibleStains();
+  var counts = {L1:0,L2:0,L3:0};
+  var html = "";
+  list.forEach(function(s){
+    var r = ENGINE.match(s.id, mid, UI.itemId);
+    counts[r.level]++;
+    html += '<div class="rcard" data-act="open" data-id="'+s.id+'" style="cursor:pointer">'+
+      '<div class="top"><b>'+esc(s.name)+'</b><span class="badge '+badgeCls(r.level)+'">'+r.level+'</span></div>'+
+      '<div class="desc">'+esc(s.famName)+' ｜ '+esc(KB.matMap[mid].name)+'<br>'+esc(r.firstAid)+'</div>'+
+      '<div class="foot"><span class="tag">'+esc(r.levelName)+'</span>'+
+        (r.caution?'<span class="tag" style="color:var(--warn)">需谨慎</span>':'')+
+        '<span style="margin-left:auto;color:var(--brand);display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700">查看方案 '+svgIco("arrow","#0F766E",13)+'</span>'+
+      '</div></div>';
+  });
+  document.getElementById("resultList").innerHTML = html ||
+    '<div class="empty" style="grid-column:1/-1"><b>没有匹配的污渍</b>换个关键词，或点「重置筛选」查看高频污渍</div>';
+  var label = (UI.itemId ? KB.itemMap[UI.itemId].name : "不限载体") + " / " + KB.matMap[mid].name;
+  document.getElementById("resultSummary").textContent =
+    "当前 "+label+" ｜ "+list.length+" 个污渍 ｜ L1 "+counts.L1+" · L2 "+counts.L2+" · L3 "+counts.L3;
+};
+
+/* 今天要处理（置顶） */
+R.today = function(){
+  var t = todayStr();
+  var overdue = ENGINE.todayCases();
+  var soon = ENGINE.soonCases();
+  var all = overdue.concat(soon);
+  var html = "";
+  all.forEach(function(c){
+    var d = diffDays(c.due,t);
+    var isOver = d < 0, isToday = d === 0;
+    var when = isOver ? ("逾期 "+Math.abs(d)+" 天 · 原定 "+c.due) : (isToday ? "今天到期 · "+c.due : "还有 "+d+" 天 · "+c.due);
+    var st = KB.stainMap[c.stainId];
+    html += '<div class="today-item'+(isOver?" overdue":"")+'">'+
+      '<span class="dot"></span><div class="body">'+
+        '<div class="t1">'+esc(c.title)+'</div>'+
+        '<div class="t2">'+esc(when)+' ｜ '+esc(statusName(c.status))+(st?' ｜ '+esc(st.famName):'')+'</div>'+
+        '<div class="acts">'+
+          '<button type="button" class="mini solid" data-act="done" data-id="'+esc(c.id)+'">标记完成</button>'+
+          '<button type="button" class="mini" data-act="today-open" data-id="'+esc(c.id)+'">查看方案</button>'+
+          '<button type="button" class="mini" data-act="postpone" data-id="'+esc(c.id)+'">顺延 1 天</button>'+
+        '</div>'+
+      '</div></div>';
+  });
+  document.getElementById("todayList").innerHTML = html ||
+    '<div class="empty" style="grid-column:1/-1"><b>今天没有待处理的事项</b>去「去渍速查」查一个污渍，或从方案详情页记一条处理单</div>';
+  document.getElementById("todayCount").textContent = all.length + " 项";
+};
+
+/* 方案详情 */
+R.detail = function(){
+  var box = document.getElementById("detailBody");
+  var r = UI.current;
+  if(!r){
+    box.innerHTML = '<div class="empty"><b>还没有选择方案</b>到「去渍速查」点任一结果卡片，这里会展示完整步骤、该做 / 禁忌与备选方案</div>';
+    return;
+  }
+  var key = r.stainId + "|" + r.materialId;
+  var done = UI.stepDone[key] || {};
+  var mat = KB.matMap[r.materialId];
+
+  var meta = "";
+  [["材质",r.material],["水温",r.temp],["预计耗时",r.time||"—"],["难度",r.diff||"—"],["污渍族",r.famName],["化学性质",r.chem]].forEach(function(p){
+    meta += '<div class="meta"><div class="k">'+esc(p[0])+'</div><div class="v">'+esc(p[1])+'</div></div>';
+  });
+
+  var steps = "";
+  r.steps.forEach(function(s,i){
+    steps += '<div class="step-item'+(done[i]?" done":"")+'" data-act="step" data-i="'+i+'">'+
+      '<span class="step-box">'+(done[i]?svgIco("check","#fff",13):"")+'</span>'+
+      '<span class="step-num-t">'+(i+1)+'.</span><span class="stxt">'+esc(s)+'</span></div>';
+  });
+
+  var dos = "", donts = "";
+  r.dos.forEach(function(x){ dos += '<li>'+esc(x)+'</li>'; });
+  r.donts.forEach(function(x){ donts += '<li>'+esc(x)+'</li>'; });
+
+  var rules = "";
+  (r.rules||[]).forEach(function(x){ rules += '<li>'+esc(x.text)+'</li>'; });
+
+  var blockBox = r.blocked
+    ? '<div class="rule-box" style="margin-top:14px"><h4>'+svgIco("alert","#DC2626",15)+'安全拦截原因</h4><p style="font-size:13px;color:#7F1D1D;line-height:1.7;margin:0">'+esc(r.reason)+'</p></div>'
+    : '';
+
+  box.innerHTML =
+    '<div class="card-h" style="margin-bottom:12px">'+
+      '<button type="button" class="mini" data-act="back">← 返回速查</button>'+
+      '<div class="right"><button type="button" class="btn sm" data-act="new-from-detail">+ 记一条处理单</button></div>'+
+    '</div>'+
+    '<div class="detail-head">'+
+      '<div class="dh-top"><h3>'+esc(r.title)+'</h3><span class="badge '+badgeCls(r.level)+'">'+r.level+' '+esc(r.levelName)+'</span></div>'+
+      '<div class="lead"><b>首处理：</b>'+esc(r.firstAid)+'　<b>化学性质：</b>'+esc(r.chem)+'</div>'+
+      (r.note?'<div class="lead" style="color:var(--warn)">'+esc(r.note)+'</div>':'')+
+    '</div>'+
+    blockBox+
+    '<div class="meta-grid">'+meta+'</div>'+
+    (r.blocked?'<div class="sec-title">'+svgIco("shield","#0F766E",15)+'应急止损（只做这些，不要继续自行去渍）</div>'
+              :'<div class="sec-title">'+svgIco("list","#0F766E",15)+'操作步骤（点击可勾选，勾选仅本地记录）</div>')+
+    '<div class="steps">'+steps+'</div>'+
+    '<div class="two-col">'+
+      '<div class="dobox do"><h4>'+svgIco("check","#15803D",15)+'该做 DO\'s</h4><ul>'+dos+'</ul></div>'+
+      '<div class="dobox dont"><h4>'+svgIco("alert","#DC2626",15)+'禁忌 DON\'Ts</h4><ul>'+donts+'</ul></div>'+
+    '</div>'+
+    '<div class="rule-box"><h4>'+svgIco("alert","#DC2626",15)+'强制安全规则（每条方案都必须遵守）</h4><ul>'+rules+'</ul></div>'+
+    '<div class="alt-box"><h4>备选 / 兜底方案</h4><p>'+esc(r.alt)+'</p></div>'+
+    '<div class="src-line">'+svgIco("shield","#64748B",13)+
+      '来源等级：<span class="tag">'+esc(KB.sources[r.src]?KB.sources[r.src].label:"通用常识")+'</span> '+
+      esc(KB.sources[r.src]?KB.sources[r.src].note:"")+
+      '　｜ 材质提示：'+esc(mat?mat.note:"")+'</div>';
+};
+
+/* 统计（含手写内联 SVG 柱状图） */
+R.records = function(){
+  var s = ENGINE.stats();
+  var cards = "";
+  [["处理单总数",s.total],["已完成",s.done],["待处理",s.todo],["我家实测",s.mine]].forEach(function(p){
+    cards += '<div class="stat"><div class="n">'+p[1]+'</div><div class="l">'+p[0]+'</div></div>';
+  });
+  /* SVG 柱状图：各污渍族处理单数，纯手写、无图表库 */
+  var maxV = Math.max(1, Math.max.apply(null, KB.families.map(function(f){ return s.byFam[f.id]||0; })));
+  var bars = "", labels = "";
+  var bw = 44, gap = 10, x0 = 12, chartH = 78;
+  KB.families.forEach(function(f,i){
+    var v = s.byFam[f.id] || 0;
+    var h = Math.max(v ? 6 : 2, Math.round(chartH * v / maxV));
+    var x = x0 + i*(bw+gap), y = chartH - h + 6;
+    bars += '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="4" fill="'+(v?f.color:"#E2E8F0")+'" opacity="'+(v?0.9:1)+'"/>';
+    bars += '<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="10" fill="#334155" font-weight="700">'+v+'</text>';
+    labels += '<text x="'+(x+bw/2)+'" y="'+(chartH+21)+'" text-anchor="middle" font-size="9" fill="#64748B">'+esc(f.name.slice(0,4))+'</text>';
+  });
+  var W = x0*2 + KB.families.length*bw + (KB.families.length-1)*gap;
+  cards += '<div class="stat" style="grid-column:1/-1;text-align:left;padding:10px 12px">'+
+    '<div class="k" style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:2px">各污渍族处理单分布</div>'+
+    '<svg width="100%" height="104" viewBox="0 0 '+W+' 104" preserveAspectRatio="xMidYMid meet" role="img" aria-label="各污渍族处理单分布柱状图">'+bars+labels+'</svg></div>';
+  document.getElementById("statGrid").innerHTML = cards;
+
+  var list = ENGINE.filteredRecords();
+  var t = todayStr();
+  var html = "";
+  list.forEach(function(c){
+    var st = KB.stainMap[c.stainId], mat = KB.matMap[c.materialId];
+    var over = c.status !== "done" && diffDays(c.due,t) < 0;
+    html += '<div class="rec'+(c.status==="done"?" done":"")+'"'+(over?' style="border-left:3px solid var(--danger)"':'')+'>'+
+      '<div class="main">'+
+        '<div class="r1">'+esc(c.title)+' <span class="badge '+statusBadge(c.status)+'">'+statusName(c.status)+'</span>'+
+          (c.mine?'<span class="badge b-blue">我家实测</span>':'')+
+          (over?'<span class="badge b-l3">逾期</span>':'')+'</div>'+
+        '<div class="r2">'+esc(c.date)+' 记录 ｜ 计划 '+esc(c.due)+' ｜ '+esc(mat?mat.name:"")+' ｜ '+esc(st?st.famName:"")+
+          (c.effect?' ｜ 效果：'+esc(c.effect):'')+'</div>'+
+        (c.note?'<div class="r3">'+esc(c.note)+'</div>':'')+
+        '<div class="acts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+
+          '<button type="button" class="mini" data-act="rec-open" data-id="'+esc(c.id)+'">查看方案</button>'+
+          '<button type="button" class="mini" data-act="rec-mine" data-id="'+esc(c.id)+'">'+(c.mine?"取消实测":"标为我家实测")+'</button>'+
+          '<button type="button" class="mini" data-act="rec-del" data-id="'+esc(c.id)+'" style="color:var(--danger)">删除</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="side">'+
+        '<select data-act="rec-status" data-id="'+esc(c.id)+'">'+
+          ['todo','doing','done'].map(function(v){ return '<option value="'+v+'"'+(c.status===v?" selected":"")+'>'+statusName(v)+'</option>'; }).join('')+
+        '</select>'+
+        '<select data-act="rec-effect" data-id="'+esc(c.id)+'">'+
+          [["","效果反馈"],["有效","有效"],["一般","一般"],["无效","无效"],["洗坏了","洗坏了"]].map(function(v){
+            return '<option value="'+v[0]+'"'+(c.effect===v[0]?" selected":"")+'>'+v[1]+'</option>'; }).join('')+
+        '</select>'+
+      '</div></div>';
+  });
+  document.getElementById("recList").innerHTML = html ||
+    '<div class="empty"><b>没有符合条件的处理单</b>点右上角「+ 新建处理单」，或调整筛选条件</div>';
+};
+
+/* 备份提醒：数据满 30 条温和提示 */
+R.backupHint = function(){
+  var n = DS.all().length, el = document.getElementById("backupHint");
+  if(n >= 30){
+    el.className = "hint";
+    el.innerHTML = svgIco("alert","#B45309",15)+'<span>数据已积累 '+n+' 条，建议点右上角「导出 JSON 备份」保存一份快照。</span>';
+  }else{ el.className = "hint hide"; el.innerHTML = ""; }
+};
+
+/* 拍照模块：只渲染预览与候选区，绝不重绘表单（避免用户已选项被重置） */
+R.photo = function(){
+  var p = UI.photo;
+  var drop = document.getElementById("photoDrop");
+  var prev = document.getElementById("photoPreview");
+  var img  = document.getElementById("photoImg");
+  if(p.dataUrl){
+    drop.className = "photo-drop hide";
+    prev.className = "photo-preview";
+    if(img.getAttribute("src") !== p.dataUrl) img.setAttribute("src", p.dataUrl);
+    var cname = { red:"红褐系", yellowbrown:"黄棕系", dark:"深色系", blue:"蓝紫系", green:"绿色系", light:"浅色 / 无色系" };
+    document.getElementById("photoSwatch").innerHTML =
+      '<i style="background:'+esc(p.hex||"#E2E8F0")+'"></i>污渍主色 '+esc(p.hex||"—")+(p.colorSignal ? ' · '+esc(cname[p.colorSignal]||"未分桶") : '');
+    document.getElementById("photoSwatchBg").innerHTML =
+      '<i style="background:'+esc(p.bgHex||"#E2E8F0")+'"></i>背景色 '+esc(p.bgHex||"—");
+  }else{
+    drop.className = "photo-drop";
+    prev.className = "photo-preview hide";
+    img.removeAttribute("src");
+  }
+
+  var box = document.getElementById("photoResult"), html = "";
+  if(p.empty){
+    html = '<div class="hint" style="margin-top:14px">'+svgIco("alert","#B45309",15)+
+      '<span>没有拿到可用特征：请在上方至少选一个「颜色」或「手感」，或直接用「去渍速查」手动选污渍。信息不足时本模块不会猜结论。</span></div>';
+  }else if(p.candidates && p.candidates.length){
+    var first = p.candidates[0];
+    html = '<div class="sec-title" style="margin-top:18px">候选污渍 <span class="sub">共 '+p.candidates.length+' 个 · 按可能性排序 · 需人工确认</span></div>'+
+      '<div class="hint" style="background:var(--danger-soft);border-color:var(--danger-line);color:var(--danger)">'+
+        svgIco("alert","#DC2626",15)+'<span>确认前先做：<b>'+esc(first.firstAid)+'</b>。若为高风险材质，请勿自行用药剂，直接送专业清洗。</span></div>'+
+      (p.source ? '<div class="legend">结果来源：'+esc(p.source)+'</div>' : '')+
+      '<div class="cand-list">';
+    p.candidates.forEach(function(c,i){
+      html += '<div class="cand">'+
+        '<div class="rank">'+(i+1)+'</div>'+
+        '<div class="cb">'+
+          '<div class="c1"><span>'+esc(c.name)+'</span><span class="conf '+c.cls+'">'+esc(c.conf)+'</span><span class="tag">'+esc(c.famName)+'</span></div>'+
+          '<div class="c2">'+esc(c.reasons.join("；"))+'</div>'+
+          '<div class="c3">首处理：'+esc(c.firstAid)+'</div>'+
+        '</div>'+
+        '<div class="ca">'+
+          '<button type="button" class="mini solid" data-act="photo-open" data-id="'+esc(c.id)+'">确认是它 · 查方案</button>'+
+          '<button type="button" class="mini" data-act="photo-case" data-id="'+esc(c.id)+'">记成处理单</button>'+
+        '</div>'+
+      '</div>';
+    });
+    html += '</div><div class="legend">候选只来自本页知识库已有的 35 种污渍；点「查方案」后仍走三级匹配与安全闸门，不会跳过禁忌校验。<b>如果都不像，请回到「去渍速查」手动选，不要勉强套用。</b></div>';
+  }
+  box.innerHTML = html;
+};
+
+/* Tab 显隐 */
+R.tabs = function(){
+  ["search","photo","detail","records"].forEach(function(k){
+    var on = UI.tab === k;
+    document.getElementById("panel-" + k).className = "card" + (on ? "" : " hide");
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"),function(b){
+    b.className = "tab" + (b.getAttribute("data-tab") === UI.tab ? " on" : "");
+  });
+};
+
+/* 统一刷新入口：固定顺序，渲染函数之间无互调 */
+function refreshAll(){
+  R.tabs();
+  R.today();
+  R.backupHint();
+  R.chips();
+  R.result();
+  R.detail();
+  R.records();
+  R.photo();
+}
+
+/* ---------- 事件层：改数据 → 统一 refreshAll()，绝不触发渲染互调 ---------- */
+var ACT = {};
+
+function switchTab(t){
+  UI.tab = t;
+  refreshAll();
+  try{ window.scrollTo({ top:0, behavior:"smooth" }); }catch(e){ window.scrollTo(0,0); }
+}
+function openSolution(stainId,itemId,materialId){
+  var mid = materialId || ENGINE.effectiveMaterial();
+  UI.current = ENGINE.match(stainId, mid, itemId || UI.itemId);
+  switchTab("detail");
+}
+
+/* 新建处理单弹窗：预填当前方案（如有） */
+ACT.newCase = function(pre){
+  var r = pre || UI.current || {};
+  var title = r.title || "";
+  var itemOpts = KB.items.map(function(i){
+    var sel = (r.itemId === i.id || (!r.itemId && i.id === "kid")) ? " selected" : "";
+    return '<option value="'+i.id+'"'+sel+'>'+esc(i.name)+'</option>';
+  }).join("");
+  var matOpts = KB.materials.map(function(m){
+    var sel = (r.materialId === m.id || (!r.materialId && m.id === "cotton")) ? " selected" : "";
+    return '<option value="'+m.id+'"'+sel+'>'+esc(m.name)+'</option>';
+  }).join("");
+  var stainOpts = KB.families.map(function(f){
+    return '<optgroup label="'+esc(f.name)+'">'+f.stains.map(function(s){
+      var sel = r.stainId === s.id ? " selected" : "";
+      return '<option value="'+s.id+'"'+sel+'>'+esc(s.name)+'</option>';
+    }).join("")+'</optgroup>';
+  }).join("");
+  openModal(
+    '<h3>新建处理单</h3><p>记下这次要处理的污渍，之后可在「我的处理记录」里补效果反馈，沉淀为「我家实测」。</p>'+
+    '<div class="form-row">'+
+      '<div class="field"><label>对象名称</label><input id="fTitle" value="'+esc(title)+'" placeholder="如：小孩校服 · 番茄酱"></div>'+
+      '<div class="field"><label>什么东西</label><select id="fItem">'+itemOpts+'</select></div>'+
+      '<div class="field"><label>材质</label><select id="fMat">'+matOpts+'</select></div>'+
+      '<div class="field"><label>污渍</label><select id="fStain">'+stainOpts+'</select></div>'+
+      '<div class="field"><label>计划处理日</label><input type="date" id="fDue" value="'+todayStr()+'"></div>'+
+      '<div class="field"><label>状态</label><select id="fStatus"><option value="todo">待处理</option><option value="doing">处理中</option><option value="done">已完成</option></select></div>'+
+    '</div>'+
+    '<div class="field" style="margin-top:11px"><label>备注（可选）</label><textarea id="fNote" placeholder="污渍位置、已试过的方法、注意事项…"></textarea></div>'+
+    '<div class="acts"><button type="button" class="btn ghost" data-act="modal-close">取消</button>'+
+    '<button type="button" class="btn" data-act="case-submit">保存处理单</button></div>'
+  );
+};
+ACT.submitCase = function(){
+  var title = (document.getElementById("fTitle").value || "").trim();
+  var itemId = document.getElementById("fItem").value;
+  var materialId = document.getElementById("fMat").value;
+  var stainId = document.getElementById("fStain").value;
+  var due = document.getElementById("fDue").value || todayStr();
+  var status = document.getElementById("fStatus").value;
+  var note = (document.getElementById("fNote").value || "").trim();
+  var st = KB.stainMap[stainId];
+  if(!title) title = (KB.itemMap[itemId] ? KB.itemMap[itemId].name : "衣物") + " · " + (st ? st.name : "污渍");
+  DS.add({ id:uid(), date:todayStr(), due:due, itemId:itemId, materialId:materialId,
+    stainId:stainId, title:title, status:status, effect:"", note:note, mine:false, demo:false });
+  closeModal(); refreshAll(); toast("处理单已保存");
+};
+ACT.confirm = function(title,text,okAct){
+  openModal('<h3>'+esc(title)+'</h3><p>'+text+'</p>'+
+    '<div class="acts"><button type="button" class="btn ghost" data-act="modal-close">取消</button>'+
+    '<button type="button" class="btn danger" data-act="'+okAct+'">确认执行</button></div>');
+};
+
+/* 导出 / 导入 */
+ACT.export = function(){
+  var blob = new Blob([DS.exportJSON()], { type:"application/json;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = "污渍清洗工作台备份_" + todayStr() + ".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  toast("已导出 " + DS.all().length + " 条处理单");
+};
+ACT.pickImport = function(){ document.getElementById("fileImport").click(); };
+ACT.doImport = function(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var n = DS.importJSON(String(reader.result));
+      refreshAll(); toast("导入成功，恢复 " + n + " 条处理单");
+    }catch(e){ toast("导入失败：不是有效的备份文件"); }
+  };
+  reader.onerror = function(){ toast("文件读取失败"); };
+  reader.readAsText(file, "utf-8");
+};
+
+/* ---------- 拍照模块动作 ---------- */
+/* 本机取色：边缘像素作背景，中心区域里与背景差异最大的像素作污渍主体 */
+ACT.analyzePhoto = function(dataUrl){
+  var img = new Image();
+  img.onload = function(){
+    try{
+      var cv = document.getElementById("photoCanvas"), ctx = cv.getContext("2d");
+      var W = 64, H = 64;
+      ctx.clearRect(0,0,W,H);
+      ctx.drawImage(img,0,0,W,H);
+      var d = ctx.getImageData(0,0,W,H).data;
+      function px(x,y){ var i=(y*W+x)*4; return [d[i],d[i+1],d[i+2]]; }
+      function avg(list){
+        var r=0,g=0,b=0,n=list.length||1;
+        list.forEach(function(p){ r+=p[0]; g+=p[1]; b+=p[2]; });
+        return [Math.round(r/n),Math.round(g/n),Math.round(b/n)];
+      }
+      var edge = [];
+      for(var x=0;x<W;x++) for(var y=0;y<H;y++){
+        if(x<8||x>=W-8||y<8||y>=H-8) edge.push(px(x,y));
+      }
+      var bg = avg(edge), scored = [];
+      for(var x2=10;x2<W-10;x2++) for(var y2=10;y2<H-10;y2++){
+        var p = px(x2,y2);
+        var dist = Math.sqrt((p[0]-bg[0])*(p[0]-bg[0])+(p[1]-bg[1])*(p[1]-bg[1])+(p[2]-bg[2])*(p[2]-bg[2]));
+        scored.push({ p:p, d:dist });
+      }
+      scored.sort(function(a,b){ return b.d-a.d; });
+      var take = scored.slice(0, Math.max(60, Math.floor(scored.length*0.18)));
+      var fg = avg(take.map(function(o){ return o.p; }));
+      function hex(a){ return "#"+a.map(function(v){ return ("0"+Math.max(0,Math.min(255,v)).toString(16)).slice(-2); }).join("").toUpperCase(); }
+      var fgHex = hex(fg), bgHex = hex(bg), signal = ENGINE.colorBucket(fgHex);
+      /* 取色只是建议：自动预选颜色下拉，用户随时可改 */
+      var sel = document.getElementById("pqColor");
+      sel.value = signal || "";
+      UI.photo.answers.color = sel.value;
+      UI.photo.dataUrl = dataUrl; UI.photo.hex = fgHex; UI.photo.bgHex = bgHex; UI.photo.colorSignal = signal;
+      UI.photo.candidates = []; UI.photo.empty = false; UI.photo.source = "";
+      refreshAll();
+      toast("已在本机完成取色，颜色项已自动预选，请人工确认");
+    }catch(err){
+      UI.photo.dataUrl = dataUrl; UI.photo.hex = ""; UI.photo.bgHex = ""; UI.photo.colorSignal = "";
+      refreshAll(); toast("图片已载入，取色失败；请手动选颜色");
+    }
+  };
+  img.onerror = function(){ toast("图片读取失败，请换一张"); };
+  img.src = dataUrl;
+};
+
+ACT.loadPhoto = function(file){
+  if(!file) return;
+  if(file.type && file.type.indexOf("image/") !== 0){ toast("请选择图片文件"); return; }
+  var reader = new FileReader();
+  reader.onload = function(){
+    var src = String(reader.result);
+    var im = new Image();
+    im.onload = function(){
+      /* 大图先压到 800px 宽，只留在会话内存，不写 localStorage、不进备份 */
+      var w = im.width, h = im.height;
+      if(w > 800){ h = Math.round(h*800/w); w = 800; }
+      var c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(im,0,0,w,h);
+      var small = src;
+      try{ small = c.toDataURL("image/jpeg",0.82); }catch(e){}
+      ACT.analyzePhoto(small);
+    };
+    im.onerror = function(){ ACT.analyzePhoto(src); };
+    im.src = src;
+  };
+  reader.onerror = function(){ toast("文件读取失败"); };
+  reader.readAsDataURL(file);
+};
+
+ACT.photoReset = function(){
+  UI.photo.dataUrl = ""; UI.photo.hex = ""; UI.photo.bgHex = ""; UI.photo.colorSignal = "";
+  UI.photo.candidates = []; UI.photo.empty = false; UI.photo.source = "";
+  UI.photo.answers = { color:"", state:"", feel:"", item:"kid", material:"cotton" };
+  ["pqColor","pqState","pqFeel"].forEach(function(id){ document.getElementById(id).value = ""; });
+  document.getElementById("pqItem").value = "kid";
+  document.getElementById("pqMaterial").value = "cotton";
+  try{ document.getElementById("photoCanvas").getContext("2d").clearRect(0,0,64,64); }catch(e){}
+  refreshAll(); toast("已清空，可重新拍照或填写");
+};
+
+ACT.infer = function(){
+  var out = ENGINE.infer(UI.photo.answers, UI.photo.hex);
+  UI.photo.empty = out.empty;
+  UI.photo.candidates = out.list;
+  UI.photo.source = "本机取色 + 特征问答（辅助判断，非确诊）";
+  refreshAll();
+  if(out.empty) toast("特征不足，请先选颜色或手感");
+  else toast("已生成 " + out.list.length + " 个候选，请人工确认");
+};
+
+ACT.photoCase = function(id){
+  var a = UI.photo.answers, st = KB.stainMap[id];
+  ACT.newCase({ itemId:a.item, materialId:a.material, stainId:id,
+    title:(KB.itemMap[a.item] ? KB.itemMap[a.item].name : "物品") + " · " + (st ? st.name : "污渍") + "（拍照辅助识别）" });
+};
+
+/* 可选云端视觉模型：默认不启用，端点与密钥只在会话内存 */
+ACT.vision = function(){
+  var ep = (document.getElementById("vEndpoint").value || "").trim();
+  var key = (document.getElementById("vKey").value || "").trim();
+  UI.photo.vision.endpoint = ep; UI.photo.vision.key = key;
+  if(!ep || !key){ toast("请填写端点与密钥；也可直接用本地辅助判断"); return; }
+  if(!UI.photo.dataUrl){ toast("请先拍一张照片"); return; }
+  if(!/^https?:\/\//i.test(ep)){ toast("端点需以 http(s):// 开头"); return; }
+  toast("正在请求云端模型…");
+  fetch(ep, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + key },
+    body: JSON.stringify({ image:UI.photo.dataUrl, hint:UI.photo.answers, stainIds:Object.keys(KB.stainMap) })
+  }).then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function(j){
+      var ids = (j && (j.stains || j.candidates)) || [];
+      if(!Array.isArray(ids)) ids = [];
+      var picked = [];
+      ids.forEach(function(x){
+        var id = typeof x === "string" ? x : (x && x.id);
+        if(id && KB.stainMap[id] && picked.indexOf(id) < 0) picked.push(id);
+      });
+      if(!picked.length) throw new Error("empty");
+      UI.photo.candidates = picked.slice(0,6).map(function(id,i){
+        var st = KB.stainMap[id];
+        return { id:id, name:st.name, fam:st.fam, famName:st.famName, score:6-i,
+          conf:i === 0 ? "最可能" : "也可能", cls:i === 0 ? "hi" : "mid",
+          reasons:["云端视觉模型返回的候选，需人工复核"], firstAid:KB.famMap[st.fam].firstAid, chem:KB.famMap[st.fam].chem };
+      });
+      UI.photo.empty = false;
+      UI.photo.source = "你接入的云端视觉模型（需人工复核）";
+      refreshAll(); toast("云端已返回候选，请人工确认");
+    }).catch(function(){ toast("云端调用失败或返回为空，本地候选仍可用"); });
+};
+
+/* 统一点击委托：所有动态元素都走 data-act */
+function onClick(e){
+  var el = e.target.closest ? e.target.closest("[data-act]") : null;
+  if(!el){
+    if(e.target.id === "mask") closeModal();
+    return;
+  }
+  var act = el.getAttribute("data-act"), id = el.getAttribute("data-id") || "";
+  switch(act){
+    case "item":     UI.itemId = id; UI.materialId = ""; refreshAll(); break;
+    case "material": UI.materialId = id; refreshAll(); break;
+    case "family":   UI.familyId = id; UI.stainId = ""; UI.kw = ""; document.getElementById("kwInput").value = ""; refreshAll(); break;
+    case "stain":    UI.stainId = id; UI.kw = ""; document.getElementById("kwInput").value = ""; refreshAll(); break;
+    case "open":     openSolution(id); break;
+    case "photo-open": openSolution(id, UI.photo.answers.item, UI.photo.answers.material); break;
+    case "photo-case": ACT.photoCase(id); break;
+    case "back":     switchTab("search"); break;
+    case "step": {
+      var r = UI.current; if(!r) break;
+      var key = r.stainId + "|" + r.materialId;
+      var d = UI.stepDone[key] || {}; var i = el.getAttribute("data-i");
+      d[i] = !d[i]; UI.stepDone[key] = d; refreshAll(); break;
+    }
+    case "new-from-detail": ACT.newCase(UI.current); break;
+    case "done":         DS.update(id,{status:"done"}); refreshAll(); toast("已标记完成，记得补一条效果反馈"); break;
+    case "postpone": {
+      var c = DS.all().filter(function(x){ return x.id === id; })[0];
+      if(c){ var parts = c.due.split("-"); var d2 = new Date(+parts[0],+parts[1]-1,+parts[2]); d2.setDate(d2.getDate()+1);
+        DS.update(id,{due:dateStr(d2)}); refreshAll(); toast("已顺延 1 天"); }
+      break;
+    }
+    case "today-open": case "rec-open": {
+      var c2 = DS.all().filter(function(x){ return x.id === id; })[0];
+      if(c2) openSolution(c2.stainId, c2.itemId, c2.materialId);
+      break;
+    }
+    case "rec-mine": {
+      var c3 = DS.all().filter(function(x){ return x.id === id; })[0];
+      if(c3){ DS.update(id,{mine:!c3.mine}); refreshAll(); toast(c3.mine ? "已取消我家实测" : "已标为我家实测"); }
+      break;
+    }
+    case "rec-del": ACT.confirm("删除这条处理单？","删除后不可恢复，若需要保留请先导出备份。","del-"+id); break;
+    case "modal-close": closeModal(); break;
+    case "case-submit": ACT.submitCase(); break;
+    case "clear-demo-ok": DS.clearDemo(); closeModal(); refreshAll(); toast("示例数据已清空"); break;
+    case "clear-all-ok": DS.clearAll(); closeModal(); refreshAll(); toast("全部处理单已清空"); break;
+    default:
+      if(act.indexOf("del-") === 0){ DS.remove(act.slice(4)); closeModal(); refreshAll(); toast("已删除"); }
+  }
+}
+/* change 委托：select 与文件输入 */
+function onChange(e){
+  var el = e.target, act = el.getAttribute("data-act");
+  if(!act) return;
+  if(act === "rec-status"){ DS.update(el.getAttribute("data-id"),{status:el.value}); refreshAll(); toast("状态已更新"); }
+  else if(act === "rec-effect"){ DS.update(el.getAttribute("data-id"),{effect:el.value}); refreshAll(); toast("效果反馈已记录"); }
+  else if(act === "filter-status"){ UI.filterStatus = el.value; refreshAll(); }
+  else if(act === "filter-family"){ UI.filterFamily = el.value; refreshAll(); }
+  else if(act === "photo-answer"){
+    UI.photo.answers[el.getAttribute("data-k")] = el.value;
+    UI.photo.candidates = []; UI.photo.empty = false; UI.photo.source = "";
+    refreshAll();
+  }
+}
+
+/* ---------- 启动：加载数据 → 初始化 → 一次性渲染 ---------- */
+function boot(){
+  ENGINE.buildIndex();
+  DS.read();                         /* 首次打开自动写入示例数据 */
+  UI.familyId = "all";
+  UI.current = null;
+
+  /* 筛选下拉：补上污渍族选项 */
+  var ff = document.getElementById("filterFamily");
+  KB.families.forEach(function(f){
+    var o = document.createElement("option"); o.value = f.id; o.textContent = f.name; ff.appendChild(o);
+  });
+
+  /* 在线通道：SDK 注入时拉全量并合并；失败自动降级本地 */
+  var db = DS.cloud();
+  if(db){
+    DS.setSync("syncing");
+    DS.cloudLoadAll(db).then(function(rows){
+      if(rows.length){
+        var local = DS.all(), map = {};
+        local.forEach(function(c){ map[c.id] = c; });
+        rows.forEach(function(c){ map[c.id] = c; });
+        DS.write(Object.keys(map).map(function(k){ return map[k]; }));
+      }
+      DS.setSync("synced"); refreshAll();
+    }).catch(function(){ DS.setSync("off"); refreshAll(); });
+    if(db.onUpdated){
+      var pending = false;
+      db.onUpdated(function(p){
+        if(pending) return; pending = true;
+        setTimeout(function(){
+          pending = false;
+          DS.cloudLoadAll(db).then(function(rows){
+            if(rows.length){ var m = {}; rows.forEach(function(c){ m[c.id] = c; }); DS.write(Object.keys(m).map(function(k){ return m[k]; })); }
+            DS.setSync("synced"); refreshAll();
+          }).catch(function(){ DS.setSync("off"); });
+        },300);
+      });
+    }
+  }else{ DS.setSync("local"); }
+
+  /* 静态事件绑定（元素在 HTML 中恒定存在） */
+  document.addEventListener("click", onClick);
+  document.addEventListener("change", onChange);
+  document.getElementById("tabs").addEventListener("click", function(e){
+    var b = e.target.closest("[data-tab]"); if(b) switchTab(b.getAttribute("data-tab"));
+  });
+  document.getElementById("kwInput").addEventListener("input", function(e){
+    UI.kw = e.target.value; UI.stainId = ""; UI.familyId = "all"; refreshAll();
+  });
+  document.getElementById("filterKw").addEventListener("input", function(e){
+    UI.filterKw = e.target.value; refreshAll();
+  });
+  /* 筛选下拉统一走 change 委托，不重复绑定 */
+  document.getElementById("filterStatus").setAttribute("data-act","filter-status");
+  document.getElementById("filterFamily").setAttribute("data-act","filter-family");
+  document.getElementById("btnReset").addEventListener("click", function(){
+    UI.itemId=""; UI.materialId=""; UI.familyId="all"; UI.stainId=""; UI.kw="";
+    document.getElementById("kwInput").value=""; refreshAll(); toast("筛选已重置");
+  });
+  document.getElementById("btnNewCase").addEventListener("click", function(){ ACT.newCase(null); });
+  document.getElementById("btnExport").addEventListener("click", ACT.export);
+  document.getElementById("btnImport").addEventListener("click", ACT.pickImport);
+  document.getElementById("fileImport").addEventListener("change", function(e){
+    if(e.target.files && e.target.files[0]) ACT.doImport(e.target.files[0]);
+    e.target.value = "";
+  });
+  document.getElementById("btnClearDemo").addEventListener("click", function(){
+    ACT.confirm("清空示例数据？","将移除所有带示例标记的处理单，你自己新建的记录不受影响。","clear-demo-ok");
+  });
+  document.getElementById("btnClearAll").addEventListener("click", function(){
+    ACT.confirm("清空全部处理单？","<b style='color:var(--danger)'>此操作不可恢复。</b>建议先点「导出 JSON 备份」保存一份。确认后所有处理单（含示例与你自己的记录）都会被清空。","clear-all-ok");
+  });
+
+  /* 拍照模块静态绑定（表单值走 change 委托，R.photo 不重绘表单） */
+  document.getElementById("btnTakePhoto").addEventListener("click", function(){ document.getElementById("filePhoto").click(); });
+  document.getElementById("btnRetake").addEventListener("click", function(){ document.getElementById("filePhoto").click(); });
+  document.getElementById("filePhoto").addEventListener("change", function(e){
+    if(e.target.files && e.target.files[0]) ACT.loadPhoto(e.target.files[0]);
+    e.target.value = "";
+  });
+  document.getElementById("btnInfer").addEventListener("click", ACT.infer);
+  document.getElementById("btnPhotoReset").addEventListener("click", ACT.photoReset);
+  document.getElementById("btnVision").addEventListener("click", ACT.vision);
+
+  refreshAll();
+}
+
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+</script>
+</body>
+</html>
