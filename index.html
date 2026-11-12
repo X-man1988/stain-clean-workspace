@@ -222,6 +222,34 @@ a{color:var(--brand);text-decoration:none}
 .vision .vbody{margin-top:11px}
 .vision .warn{font-size:12px;color:#7F1D1D;background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:8px;padding:8px 10px;line-height:1.65;margin-bottom:10px}
 
+/* ---------- 口语速查（不懂材质也能查） ---------- */
+.plain-box{background:linear-gradient(135deg,#F0FDFA,#FFFFFF 70%);border:1px solid var(--brand-line);border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.plain-h{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}
+.plain-h .ph-ico{width:32px;height:32px;border-radius:9px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex:none}
+.plain-h b{display:block;font-size:14px;font-weight:800;color:var(--brand-dark);line-height:1.45}
+.plain-h span{display:block;font-size:12.2px;color:var(--muted);line-height:1.6;margin-top:2px}
+.plain-line{display:flex;gap:9px;align-items:stretch;flex-wrap:wrap}
+.plain-line input{flex:1;min-width:210px;min-height:46px;padding:9px 12px;border:1px solid var(--line-2);border-radius:var(--radius-s);font-size:16px;outline:none;background:#fff}
+.plain-line input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.plain-line .btn{flex:none}
+.plain-egs{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.plain-eg{min-height:34px;padding:5px 11px;border:1px solid var(--line-2);border-radius:999px;background:#fff;font-size:12.3px;font-weight:600;color:var(--ink-2)}
+.plain-eg:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.plain-card{margin-top:12px;border:1px solid var(--line);border-radius:var(--radius-s);padding:12px;background:#fff}
+.plain-card .pc-h{font-size:13px;font-weight:800;color:var(--ink-2);margin-bottom:9px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.plain-card .pc-h .tag{font-weight:600}
+.plain-row{margin-top:10px}
+.plain-row .pr-l{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.3px}
+.plain-pick{display:flex;gap:7px;flex-wrap:wrap}
+.plain-pick .chip{min-height:44px;font-size:13px}
+.plain-why{font-size:12.2px;color:var(--ink-2);line-height:1.7;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px}
+.plain-why b{color:var(--brand-dark)}
+.plain-risk{font-size:12.2px;line-height:1.7;border-radius:8px;padding:8px 10px;margin-top:8px;background:var(--danger-soft);border:1px solid var(--danger-line);color:#7F1D1D}
+.plain-risk b{color:var(--danger)}
+.plain-foot{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.plain-foot .pf-tip{font-size:12.2px;color:var(--muted);line-height:1.6;flex:1;min-width:180px}
+.plain-empty{font-size:12.3px;color:var(--muted);line-height:1.7;margin-top:10px}
+
 /* ---------- 移动端 ---------- */
 @media(max-width:768px){
   .topbar-in{padding:9px 12px;gap:9px}
@@ -245,6 +273,11 @@ a{color:var(--brand);text-decoration:none}
   .cand{flex-direction:column}
   .cand .ca{flex-direction:row;width:100%;flex-wrap:wrap}
   .cand .ca .btn,.cand .ca .mini{flex:1;justify-content:center}
+  .plain-box{padding:12px}
+  .plain-line input{min-width:100%}
+  .plain-line .btn{width:100%}
+  .plain-foot .btn{width:100%}
+  .plain-pick .chip{flex:1 1 auto;justify-content:center;min-width:44px}
 }
 @media(min-width:769px){ .mobile-only{display:none} }
 </style>
@@ -259,7 +292,7 @@ a{color:var(--brand);text-decoration:none}
       </div>
       <div class="brand-txt">
         <b>污渍清洗方法工作台</b>
-        <small>污渍 × 材质 → 方案 ｜ 离线可用</small>
+        <small>大白话输入也行 ｜ 污渍 × 材质 → 方案 ｜ 离线可用</small>
       </div>
     </div>
     <span id="syncBadge" class="sync local"><i></i>本地存储</span>
@@ -296,7 +329,28 @@ a{color:var(--brand);text-decoration:none}
 
   <!-- 模块1 去渍速查 -->
   <section class="card" id="panel-search">
-    <div class="card-h"><h2>去渍速查</h2><span class="sub">三步定位：什么东西 → 什么材质 → 什么污渍</span></div>
+    <div class="card-h"><h2>去渍速查</h2><span class="sub">不认识材质就用大白话查；懂材质可直接用下面三步定位</span></div>
+
+    <!-- 口语速查：给不懂材质分类的人，翻译「日常叫法 → 材质族」 -->
+    <div class="plain-box">
+      <div class="plain-h">
+        <div class="ph-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.5 9.5 0 0 1-4-.9L3 21l1.9-4.8A8.4 8.4 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/><line x1="9" y1="11.5" x2="9.01" y2="11.5"/><line x1="12.5" y1="11.5" x2="12.51" y2="11.5"/><line x1="16" y1="11.5" x2="16.01" y2="11.5"/></svg></div>
+        <div><b>不知道是什么材质？直接用大白话查</b><span>把「什么东西 + 什么污渍」打进去，我按日常叫法帮你推断材质；推断结果由你确认后才出方案，猜错随时改。</span></div>
+      </div>
+      <div class="plain-line">
+        <input type="search" id="plainInput" placeholder="例如：冲锋衣 马克笔 / 羊毛衫 咖啡 / 皮沙发 圆珠笔" autocomplete="off">
+        <button class="btn" id="btnPlainGo" type="button">帮我查</button>
+      </div>
+      <div class="plain-egs">
+        <button type="button" class="plain-eg" data-act="plain-eg" data-id="冲锋衣 马克笔">冲锋衣 马克笔</button>
+        <button type="button" class="plain-eg" data-act="plain-eg" data-id="小孩校服 番茄酱">小孩校服 番茄酱</button>
+        <button type="button" class="plain-eg" data-act="plain-eg" data-id="羊毛衫 咖啡">羊毛衫 咖啡</button>
+        <button type="button" class="plain-eg" data-act="plain-eg" data-id="皮沙发 圆珠笔">皮沙发 圆珠笔</button>
+        <button type="button" class="plain-eg" data-act="plain-eg" data-id="白墙 蜡笔">白墙 蜡笔</button>
+      </div>
+      <div id="plainResult"></div>
+    </div>
+
     <div class="search-line" style="margin-bottom:14px">
       <div class="kw">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
@@ -418,7 +472,7 @@ a{color:var(--brand);text-decoration:none}
     <div class="rec-list" id="recList"></div>
   </section>
 
-  <div class="footnote">知识库为通用家庭护理常识整理，仅供速查参考；贵重、真丝羊毛、真皮、壁纸等物品建议先送专业清洗。<br>所有方案均要求先在不显眼处测试，含氯漂白剂严禁与酸性清洁剂 / 氨类混用。处理记录仅保存在你的浏览器；拍照默认在本机取色、不上传，只有你主动填写云端视觉接口并点击按钮时，照片才会发送到该接口。</div>
+  <div class="footnote">知识库为通用家庭护理常识整理，仅供速查参考；贵重、真丝羊毛、真皮、壁纸等物品建议先送专业清洗。<br>口语速查里的材质是按日常叫法推断的提示，不是材质鉴定，请以洗标成分标签为准；不确定材质时只做应急止损。<br>所有方案均要求先在不显眼处测试，含氯漂白剂严禁与酸性清洁剂 / 氨类混用。处理记录仅保存在你的浏览器；拍照默认在本机取色、不上传，只有你主动填写云端视觉接口并点击按钮时，照片才会发送到该接口。</div>
 </div>
 
 <div id="modalRoot"></div>
@@ -850,6 +904,75 @@ KB.solutions = KB.solutions.concat([
 /* 常用污渍快捷入口（首屏速查） */
 KB.quick = ["blood","coffee","juice","cookoil","lipstick","marker","gum","mud","mold","urine"];
 
+/* ---------- 口语速查别名库：日常叫法 → 载体 + 材质族 ----------
+   只做「翻译提示」，不是材质鉴定；命中后必须由用户确认，最终以洗标成分标签为准。
+   多材质（mats.length>1）表示光看名字判断不了，强制用户点选，绝不自动猜。
+   item 必须与 KB.items 中该载体的 materials 范围一致，否则三步筛选的材质 chip 会不显示。 */
+KB.itemAlias = [
+  /* 户外 / 涂层化纤 */
+  { k:["冲锋衣","冲锋裤","防风衣","防晒衣","防晒服","皮肤衣","速干衣","速干裤","运动外套","滑雪服","雨衣","软壳","硬壳","户外外套","瑜伽裤","打底裤","泳衣","羽绒服","羽绒马甲","棉服","运动服","球衣","冲锋衣面料","防水外套"],
+    item:"adult", mats:["synthetic"], label:"户外 / 化纤外套", coat:true,
+    why:"这类衣服基本是涤纶、锦纶加防水防泼涂层，归到「化纤 / 混纺」。忌高温烘干，忌酒精、丙酮、香蕉水等强溶剂（会溶解涂层、留下发白斑）。" },
+  /* 小孩衣物 */
+  { k:["校服","园服","幼儿园园服","学生服","童装","小孩衣服","小孩衣物","宝宝衣服","婴儿服","连体衣","口水巾","围兜","儿童T恤","小孩T恤","宝宝裤","童装外套","尿布"],
+    item:"kid", mats:["cotton"], label:"小孩衣物（多为棉）",
+    why:"校服、口水巾、连体衣以棉为主。小孩衣物慎用刺激性溶剂与含氯漂白剂，必须多次清水漂洗至无残留，避免接触皮肤。" },
+  /* 真丝羊毛：高风险 */
+  { k:["羊毛衫","羊绒衫","羊绒","羊毛","毛衣","针织衫","呢子大衣","毛呢","羊绒围巾","真丝","桑蚕丝","丝巾","丝绸","真丝衬衫","蚕丝","羊绒大衣","羊毛大衣","羊毛围巾","开司米","羊绒披肩","羊毛裤"],
+    item:"adult", mats:["silkwool"], label:"真丝 / 羊毛 / 羊绒", high:true,
+    why:"蛋白质纤维，遇热水、碱性洗衣粉、含酶洗衣粉会缩水毡化且不可逆，属高风险材质。方案会走安全拦截，建议优先送专业干洗。" },
+  /* 棉麻 */
+  { k:["牛仔裤","牛仔衣","丹宁","纯棉","棉T恤","白T恤","T恤","t恤","polo衫","棉衬衫","卫衣","文化衫","棉袄","棉麻","亚麻","麻布","床单","被套","枕套","毛巾","浴巾","帆布包","帆布袋","围裙","桌布","手帕","棉袜","袜子"],
+    item:"adult", mats:["cotton"], label:"棉 / 麻 / 棉麻",
+    why:"耐碱不耐酸，白色棉织物可谨慎用氧系彩漂；彩色衣物别用含氯漂白剂。可水洗、耐温较高。" },
+  /* 鞋：化纤网面 */
+  { k:["运动鞋","球鞋","跑鞋","网面鞋","老爹鞋","篮球鞋","小白鞋","运动靴","登山鞋","网鞋"],
+    item:"shoes", mats:["synthetic"], label:"运动鞋 / 网面鞋", coat:true,
+    why:"网面、合成革鞋面多为化纤，靠胶粘成型；忌高温烘干与强溶剂（会脱胶、发白、开胶）。" },
+  /* 鞋：布面 */
+  { k:["帆布鞋","板鞋","布鞋","鞋带","鞋垫","帆布面"],
+    item:"shoes", mats:["cotton"], label:"帆布 / 布面鞋",
+    why:"帆布属棉麻族，可水洗但需阴干，避免暴晒发黄；鞋底胶边别长时间泡水。" },
+  /* 皮革：高风险 */
+  { k:["皮鞋","皮靴","皮凉鞋","靴子","雪地靴","翻毛皮","绒面靴","磨砂皮","鹿皮","真皮","皮包","皮带","皮手套","皮革","皮质","翻毛靴"],
+    item:"shoes", mats:["leather"], label:"皮革 / 绒面", high:true,
+    why:"皮革忌浸水、酒精、暴晒，只做局部点处理，处理后干布吸干自然阴干；属高风险材质。" },
+  /* 皮沙发 */
+  { k:["皮沙发","皮质沙发","真皮沙发","皮座椅","皮坐垫","皮椅","皮质座椅"],
+    item:"sofa", mats:["leather"], label:"皮质沙发 / 座椅", high:true,
+    why:"皮沙发忌浸水、酒精与暴晒，只能局部点处理；大面积污渍建议联系厂家售后。" },
+  /* 布艺沙发 */
+  { k:["布艺沙发","科技布","沙发","沙发垫","坐垫","靠垫","抱枕","布艺椅","床垫","地毯","布沙发","软包"],
+    item:"sofa", mats:["upholstery"], label:"布艺 / 科技布沙发", high:true,
+    why:"不可拆洗，水分渗入海绵会发霉、留水圈；只能少量局部按压，务必先在不显眼处试。属高风险材质。" },
+  /* 木饰面 */
+  { k:["实木茶几","木桌","木地板","茶几","木质家具","木饰面","实木","原木","木柜","餐桌","木椅","竹木","地板"],
+    item:"sofa", mats:["wood"], label:"实木 / 木饰面",
+    why:"木质家具忌大量用水浸泡与强碱。本类暂无专属方案，会走同族通用方案并强制先局部测试。" },
+  /* 乳胶漆墙 */
+  { k:["乳胶漆","乳胶漆墙","白墙","墙面","墙壁","墙","天花板","涂料墙","白漆墙","白墙面"],
+    item:"wall", mats:["latex"], label:"乳胶漆墙面",
+    why:"乳胶漆反复擦会掉粉露底，宜按压吸附不要来回搓，忌强溶剂与钢丝球；顽固印痕局部补漆更可靠。" },
+  /* 壁纸：高风险 */
+  { k:["壁纸","墙纸","墙布","壁布","无纺布墙纸"],
+    item:"wall", mats:["wallpaper"], label:"壁纸 / 墙布", high:true,
+    why:"绝大多数壁纸遇水即起翘褪色，属高风险材质；建议直接咨询厂家或专业人员。" },
+  /* 瓷砖硬面 */
+  { k:["瓷砖","瓷砖墙","浴室砖","厨房砖","玻璃","镜子","玻璃窗","台面","地砖","墙砖","洗手台","不锈钢","水槽"],
+    item:"wall", mats:["tile"], label:"瓷砖 / 玻璃 / 硬面",
+    why:"硬质表面耐酸碱、可用力擦；但强酸与含氯漂白剂严禁混用，哑光砖 / 仿古砖忌丙酮。" },
+  /* 泛称：必须用户选材质 */
+  { k:["衣服","上衣","裤子","衬衫","衬衣","裙子","外套","大衣","西装","内衣","睡衣","连衣裙","床品","包包","围巾","T恤衫","衬衣衫"],
+    item:"adult", mats:["cotton","synthetic","silkwool"], label:"常见衣物（材质不定）", ambiguous:true,
+    why:"这个叫法可能对应好几种材质，光看名字判断不了。请看洗标上的成分标签选一个；实在看不懂就选「不确定材质」。" },
+  { k:["鞋子","鞋"],
+    item:"shoes", mats:["synthetic","cotton","leather"], label:"鞋子（材质不定）", ambiguous:true,
+    why:"鞋面可能是网面化纤、帆布或皮革，处理方式差别很大，请选一个最像的。" },
+  { k:["家具","家具表面","家具台面"],
+    item:"sofa", mats:["upholstery","leather","wood"], label:"家具（材质不定）", ambiguous:true,
+    why:"布艺、皮革、实木的忌用成分完全不同，请选一个最像的；不确定就按最保守处理。" }
+];
+
 /* 族 → 名称 / 颜色的快速索引，由 init 构建 */
 KB.famMap = {};
 KB.stainMap = {};
@@ -1051,7 +1174,9 @@ var UI = {
   current:null, stepDone:{}, modal:null,
   /* 拍照模块状态：仅会话内存，图片不写入 localStorage、不进备份文件 */
   photo:{ dataUrl:"", hex:"", bgHex:"", colorSignal:"", candidates:[], source:"", vision:{"endpoint":"","key":""},
-    answers:{ color:"", state:"", feel:"", item:"kid", material:"cotton" } }
+    answers:{ color:"", state:"", feel:"", item:"kid", material:"cotton" } },
+  /* 口语速查状态：仅会话内存，不写入 localStorage、不进备份文件 */
+  plain:{ text:"", parsed:null, pickedMat:"", pickedStain:"", showAllMat:false, showAllStain:false }
 };
 
 /* ---------- 计算层：纯函数，输入数据 → 输出结果，不碰 DOM ---------- */
@@ -1222,6 +1347,62 @@ ENGINE.infer = function(a, hex){
       reasons:why[id].slice(0,3), firstAid:KB.famMap[st.fam].firstAid, chem:KB.famMap[st.fam].chem };
   }).sort(function(x,y){ return y.score - x.score || (x.id < y.id ? -1 : 1); }).slice(0,6);
   return { empty:false, color:color, list:list };
+};
+
+/* ---------- 口语速查解析：把「日常叫法 + 污渍」翻译成材质族与污渍 ----------
+   纯函数，不碰 DOM；候选只来自 KB.itemAlias / KB.stainMap，绝不生成新结论。
+   物品与污渍都用「最长匹配」，避免「鞋」抢走「皮鞋」、「笔迹」抢走「圆珠笔」。 */
+ENGINE.parsePlain = function(text){
+  var raw = (text || "").trim();
+  /* 只去掉空白与标点，绝不删汉字（否则「冲锋衣」会被削成「冲锋」） */
+  var norm = raw.toLowerCase().replace(/[\s,，、。;；!！?？:：\/\\+＋·~～_()（）\[\]【】"']+/g,"");
+  var out = { raw:raw, item:"", itemLabel:"", hitWord:"", mats:[], why:"",
+              coat:false, high:false, ambiguous:false,
+              stainId:"", stainLabel:"", stainCands:[], msg:"" };
+
+  /* 1) 物品别名：最长命中 */
+  var best = null, bestLen = 0, bestWord = "";
+  KB.itemAlias.forEach(function(a){
+    a.k.forEach(function(w){
+      var lw = w.toLowerCase();
+      if(norm.indexOf(lw) >= 0 && lw.length > bestLen){ best = a; bestLen = lw.length; bestWord = w; }
+    });
+  });
+  if(best){
+    out.item = best.item; out.itemLabel = best.label; out.hitWord = bestWord;
+    out.mats = best.mats.slice(); out.why = best.why || "";
+    out.coat = !!best.coat; out.high = !!best.high; out.ambiguous = !!best.ambiguous;
+  }else{
+    out.msg = "没认出你说的是什么东西，请直接在下面点一个材质。";
+  }
+  /* 小孩 / 宝宝 / 儿童等词强制归到小孩衣物，触发 R5 儿童漂洗规则 */
+  if(/小孩|宝宝|婴儿|儿童|幼儿|学生|校服|园服/.test(norm) && KB.itemMap.kid) out.item = "kid";
+
+  /* 2) 污渍：name 拆词 + aliases，最长命中；多个命中交给用户选，不擅自替他定 */
+  var hits = [];
+  Object.keys(KB.stainMap).forEach(function(id){
+    var st = KB.stainMap[id], words = [];
+    st.name.split(/[\/／]/).forEach(function(x){ words.push(x.trim()); });
+    (st.aliases || []).forEach(function(x){ words.push(x); });
+    var bw = "", bl = 0;
+    words.forEach(function(w){
+      var lw = w.toLowerCase().trim();
+      if(lw.length >= 2 && norm.indexOf(lw) >= 0 && lw.length > bl){ bw = w; bl = lw.length; }
+    });
+    if(bw) hits.push({ id:id, name:st.name, word:bw, len:bl, famName:st.famName });
+  });
+  hits.sort(function(a,b){ return b.len - a.len; });
+  /* 压制被更长命中包含的短词，避免同一意思重复出现在候选里 */
+  var kept = [];
+  hits.forEach(function(h){
+    var shadow = false;
+    kept.forEach(function(k){ if(k.len > h.len && k.word.indexOf(h.word) >= 0) shadow = true; });
+    if(!shadow) kept.push(h);
+  });
+  out.stainCands = kept.slice(0,6);
+  if(kept.length === 1){ out.stainId = kept[0].id; out.stainLabel = kept[0].name; }
+  else if(kept.length === 0){ out.msg += (out.msg ? " " : "") + "也没认出污渍，请在下面点一个。"; }
+  return out;
 };
 
 /* 结果区应展示哪些污渍 */
@@ -1572,6 +1753,71 @@ R.photo = function(){
   box.innerHTML = html;
 };
 
+/* 口语速查解析结果：只重绘结果容器，绝不重绘输入框（避免输入焦点丢失） */
+R.plain = function(){
+  var p = UI.plain, box = document.getElementById("plainResult"), html = "";
+  if(!p.parsed){
+    box.innerHTML = '<div class="plain-empty">输入后点「帮我查」，或直接点上面的例子。推断只作参考，最终以洗标上的成分标签为准。</div>';
+    return;
+  }
+  var d = p.parsed;
+  html += '<div class="plain-card">';
+  html += '<div class="pc-h">我理解你说的：<span class="tag">'+esc(d.raw)+'</span>'+
+    (d.hitWord ? '<span class="tag">'+esc(d.hitWord)+' → '+esc(d.itemLabel)+'</span>' : '<span class="tag">未识别物品，请手动选</span>')+'</div>';
+  if(d.msg) html += '<div class="plain-why">'+esc(d.msg)+'</div>';
+
+  /* ① 材质确认 */
+  var matIds = (p.showAllMat || !d.mats.length)
+    ? KB.materials.map(function(m){ return m.id; }) : d.mats.slice();
+  html += '<div class="plain-row"><div class="pr-l">① 它大概是什么材质'+
+    (d.ambiguous ? '（这个叫法可能有多种，请选一个）' : '（按名字推断，可改）')+'</div><div class="plain-pick">';
+  matIds.forEach(function(mid){
+    var m = KB.matMap[mid]; if(!m) return;
+    var risk = m.risk === "high" ? '<small>高风险</small>' : (m.risk === "mid" ? '<small>需谨慎</small>' : '');
+    html += '<button type="button" class="chip'+(p.pickedMat===mid?" on":"")+'" data-act="plain-mat" data-id="'+mid+'">'+esc(m.name)+risk+'</button>';
+  });
+  html += '<button type="button" class="chip'+(p.pickedMat==="unknown"?" on":"")+'" data-act="plain-mat" data-id="unknown">不确定 / 看不懂洗标</button>';
+  html += '</div>';
+  if(!p.showAllMat) html += '<button type="button" class="plain-eg" style="margin-top:8px" data-act="plain-allmat">推断不对？显示全部材质</button>';
+  if(d.why) html += '<div class="plain-why"><b>为什么这么判断：</b>'+esc(d.why)+'</div>';
+  html += '</div>';
+
+  /* ② 污渍确认 */
+  var stainIds = p.showAllStain ? Object.keys(KB.stainMap)
+    : (d.stainCands.length ? d.stainCands.map(function(c){ return c.id; }) : KB.quick);
+  html += '<div class="plain-row"><div class="pr-l">② 是什么污渍'+
+    (d.stainId ? '（已按名字认出，可改）' : '（请选一个）')+'</div><div class="plain-pick">';
+  stainIds.forEach(function(sid){
+    var st = KB.stainMap[sid]; if(!st) return;
+    html += '<button type="button" class="chip'+(p.pickedStain===sid?" on":"")+'" data-act="plain-stain" data-id="'+sid+'">'+esc(st.name)+'</button>';
+  });
+  html += '</div>';
+  if(!p.showAllStain) html += '<button type="button" class="plain-eg" style="margin-top:8px" data-act="plain-allstain">没找到？显示全部污渍</button>';
+  html += '</div>';
+
+  /* 安全提示：涂层 / 高风险 / 推断非鉴定 */
+  if(d.coat) html += '<div class="plain-risk"><b>有防水 / 防泼涂层：</b>严禁酒精、丙酮、香蕉水与高温烘干，涂层会被溶解发白；务必先在不显眼处试。</div>';
+  if(d.high) html += '<div class="plain-risk"><b>高风险材质：</b>方案会走安全拦截（只给应急止损 + 建议送洗），请勿自行用药剂。</div>';
+  html += '<div class="plain-why"><b>这是按名字推断，不是材质鉴定。</b>请以洗标成分标签为准；洗标也看不懂就选「不确定」，只做干布按压吸附并送专业清洗（对应安全规则 R10）。</div>';
+
+  /* 底部动作 */
+  html += '<div class="plain-foot">';
+  if(p.pickedMat === "unknown"){
+    html += '<span class="pf-tip">已选「不确定材质」：不会套用任何具体药剂方案。</span>'+
+      '<button type="button" class="btn" data-act="plain-safe">查看保守处理建议</button>';
+  }else if(p.pickedMat && p.pickedStain){
+    var mName = KB.matMap[p.pickedMat] ? KB.matMap[p.pickedMat].name : "";
+    var sName = KB.stainMap[p.pickedStain] ? KB.stainMap[p.pickedStain].name : "";
+    html += '<span class="pf-tip">将按 <b>'+esc(mName)+'</b> × <b>'+esc(sName)+'</b> 走三级匹配与安全闸门。</span>'+
+      '<button type="button" class="btn" data-act="plain-apply">就用这个查方案</button>';
+  }else{
+    html += '<span class="pf-tip">请先点选「材质」和「污渍」，确认后才出方案，我不会替你猜。</span>';
+  }
+  html += '<button type="button" class="btn ghost sm" data-act="plain-reset">清空重填</button>';
+  html += '</div></div>';
+  box.innerHTML = html;
+};
+
 /* Tab 显隐 */
 R.tabs = function(){
   ["search","photo","detail","records"].forEach(function(k){
@@ -1588,6 +1834,7 @@ function refreshAll(){
   R.tabs();
   R.today();
   R.backupHint();
+  R.plain();
   R.chips();
   R.result();
   R.detail();
@@ -1660,6 +1907,60 @@ ACT.confirm = function(title,text,okAct){
   openModal('<h3>'+esc(title)+'</h3><p>'+text+'</p>'+
     '<div class="acts"><button type="button" class="btn ghost" data-act="modal-close">取消</button>'+
     '<button type="button" class="btn danger" data-act="'+okAct+'">确认执行</button></div>');
+};
+
+/* ---------- 口语速查动作：解析 → 人工确认 → 回写现有筛选状态 ---------- */
+ACT.plainGo = function(text){
+  var inp = document.getElementById("plainInput");
+  var raw = (typeof text === "string" ? text : inp.value).trim();
+  if(!raw){ toast("先写点东西，比如「冲锋衣 马克笔」"); inp.focus(); return; }
+  inp.value = raw;
+  var d = ENGINE.parsePlain(raw);
+  /* 只在唯一推断时预选；多材质 / 多污渍一律留空，等用户点，绝不替他猜 */
+  UI.plain = { text:raw, parsed:d,
+    pickedMat: d.mats.length === 1 ? d.mats[0] : "",
+    pickedStain: d.stainId || "",
+    showAllMat:false, showAllStain:false };
+  refreshAll();
+  if(d.mats.length === 1 && d.stainId) toast("已推断材质与污渍，确认后点「就用这个查方案」");
+};
+ACT.plainReset = function(){
+  UI.plain = { text:"", parsed:null, pickedMat:"", pickedStain:"", showAllMat:false, showAllStain:false };
+  document.getElementById("plainInput").value = "";
+  refreshAll();
+};
+ACT.plainApply = function(){
+  var p = UI.plain;
+  if(!p.parsed || !p.pickedMat || p.pickedMat === "unknown" || !p.pickedStain) return;
+  UI.itemId = p.parsed.item || "";
+  UI.materialId = p.pickedMat;
+  UI.stainId = p.pickedStain;
+  UI.familyId = "all";
+  UI.kw = "";
+  document.getElementById("kwInput").value = "";
+  refreshAll();
+  var m = KB.matMap[p.pickedMat], st = KB.stainMap[p.pickedStain];
+  toast("已按「" + (m ? m.name : "") + " × " + (st ? st.name : "") + "」定位到方案");
+  try{
+    var box = document.getElementById("resultList");
+    if(box.scrollIntoView) box.scrollIntoView({ behavior:"smooth", block:"start" });
+  }catch(e){}
+};
+ACT.plainSafe = function(){
+  openModal(
+    '<h3>不确定材质时，只做保守处理</h3>'+
+    '<p>材质成分不明、或物品有涂层 / 不可水洗标识时，套用任何具体药剂都可能造成不可逆损伤。按下面几步止损即可，剩下的交给专业清洗。</p>'+
+    '<div class="dobox dont"><h4>不要做</h4><ul>'+
+      '<li>不要上酒精、丙酮、香蕉水、漂白水等任何溶剂或药剂</li>'+
+      '<li>不要用热水、不要揉搓、不要浸泡、不要烘干</li>'+
+      '<li>不要同时混用两种清洁剂</li></ul></div>'+
+    '<div class="dobox do" style="margin-top:10px"><h4>可以做</h4><ul>'+
+      '<li>干白布 / 纸巾按压吸附表层，固体用钝卡片由外向内轻轻刮起</li>'+
+      '<li>保持原样，尽快送专业清洗并说明污渍类型与已做过的处理</li>'+
+      '<li>送洗前拍张照片，记下物品名称与污渍来源</li>'+
+      '<li>若一定要试，先在衣缝内侧 / 沙发背面 / 墙角局部测试并观察 5 分钟</li></ul></div>'+
+    '<div class="acts"><button type="button" class="btn" data-act="modal-close">知道了</button></div>'
+  );
 };
 
 /* 导出 / 导入 */
@@ -1829,6 +2130,15 @@ function onClick(e){
   }
   var act = el.getAttribute("data-act"), id = el.getAttribute("data-id") || "";
   switch(act){
+    /* 口语速查：示例 / 材质与污渍点选 / 展开 / 确认 / 保守建议 */
+    case "plain-eg":      ACT.plainGo(id); break;
+    case "plain-mat":     UI.plain.pickedMat = id; refreshAll(); break;
+    case "plain-stain":   UI.plain.pickedStain = id; refreshAll(); break;
+    case "plain-allmat":  UI.plain.showAllMat = true; refreshAll(); break;
+    case "plain-allstain":UI.plain.showAllStain = true; refreshAll(); break;
+    case "plain-apply":   ACT.plainApply(); break;
+    case "plain-safe":    ACT.plainSafe(); break;
+    case "plain-reset":   ACT.plainReset(); break;
     case "item":     UI.itemId = id; UI.materialId = ""; refreshAll(); break;
     case "material": UI.materialId = id; refreshAll(); break;
     case "family":   UI.familyId = id; UI.stainId = ""; UI.kw = ""; document.getElementById("kwInput").value = ""; refreshAll(); break;
@@ -1935,6 +2245,11 @@ function boot(){
   document.getElementById("kwInput").addEventListener("input", function(e){
     UI.kw = e.target.value; UI.stainId = ""; UI.familyId = "all"; refreshAll();
   });
+  /* 口语速查静态绑定：输入框是静态元素，R.plain 只重绘结果区，不会丢焦点 */
+  document.getElementById("btnPlainGo").addEventListener("click", function(){ ACT.plainGo(); });
+  document.getElementById("plainInput").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); ACT.plainGo(); }
+  });
   document.getElementById("filterKw").addEventListener("input", function(e){
     UI.filterKw = e.target.value; refreshAll();
   });
@@ -1943,6 +2258,8 @@ function boot(){
   document.getElementById("filterFamily").setAttribute("data-act","filter-family");
   document.getElementById("btnReset").addEventListener("click", function(){
     UI.itemId=""; UI.materialId=""; UI.familyId="all"; UI.stainId=""; UI.kw="";
+    UI.plain = { text:"", parsed:null, pickedMat:"", pickedStain:"", showAllMat:false, showAllStain:false };
+    document.getElementById("plainInput").value="";
     document.getElementById("kwInput").value=""; refreshAll(); toast("筛选已重置");
   });
   document.getElementById("btnNewCase").addEventListener("click", function(){ ACT.newCase(null); });
